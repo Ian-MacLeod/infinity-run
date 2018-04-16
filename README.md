@@ -15,6 +15,18 @@ Infinite run will include the following functionality:
 * [ ] Music and sound effects, which can be muted
 * [ ] A directions modal explaining the point of the game and the control scheme
 
+## Wireframes
+
+Infinite run will be a single page taken up mostly by a canvas element that will house the actual game.
+
+There will be a button to toggle the sound of the game at the top right of the canvas.
+
+Below the canvas on the right hand side there will be buttons pointing to my Github and LinkedIn profiles.
+
+Also below the canvas, but centered, will be a button that brings up a modal with instructions about how to play and what the control scheme is for the game.
+
+![Infinity Run Wireframe](https://i.imgur.com/7bCBZaD.png)
+
 ## Architecture
 
 The technologies used for the project will be:
