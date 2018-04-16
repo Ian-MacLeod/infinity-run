@@ -1,0 +1,28 @@
+{
+  "name": "infinity-run",
+  "version": "1.0.0",
+  "description": "## Overview",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "webpack --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Ian-MacLeod/infinity-run.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Ian-MacLeod/infinity-run/issues"
+  },
+  "homepage": "https://github.com/Ian-MacLeod/infinity-run#readme",
+  "dependencies": {
+    "webpack": "^3.10.0"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-loader": "^7.1.4",
+    "babel-preset-env": "^1.6.1"
+  }
+}
