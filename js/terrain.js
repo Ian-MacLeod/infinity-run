@@ -1,10 +1,12 @@
 import { randRange } from "./utils";
+import { spriteLocations } from "./sprites";
 
 class Terrain {
   constructor(start, height, width) {
     this.start = start;
     this.height = height;
     this.width = width;
+    this.sprites = spriteLocations.environment;
   }
 
   getEnd() {
@@ -27,7 +29,7 @@ class Terrain {
   }
 
   static nextWidth() {
-    return randRange(300, 800);
+    return randRange(1, 10) * Terrain.BLOCK_WIDTH;
   }
 
   contains(pos) {
@@ -38,12 +40,38 @@ class Terrain {
 
   draw(ctx) {
     ctx.fillStyle = "#756";
-    ctx.fillRect(this.start, 500 - this.height, this.width, this.height);
+    for (let col = 0; col < this.getBlockWidth(); col++) {
+      for (let row = 0; row < this.getBlockHeight(); row++) {
+        let tile = "stoneCenter";
+        if (row === 0) {
+          tile = "stoneMid";
+        }
+        ctx.drawImage(
+          this.sprites.imageEl,
+          ...this.sprites.locations[tile],
+          Math.floor(this.start + col * Terrain.BLOCK_WIDTH),
+          500 - this.height + row * Terrain.BLOCK_HEIGHT,
+          Terrain.BLOCK_WIDTH,
+          Terrain.BLOCK_HEIGHT
+        );
+      }
+    }
+  }
+
+  getBlockHeight() {
+    return this.height / Terrain.BLOCK_HEIGHT;
+  }
+
+  getBlockWidth() {
+    return this.width / Terrain.BLOCK_WIDTH;
   }
 
   nextState(playerSpeed, delta) {
     this.start -= playerSpeed * delta;
   }
 }
+
+Terrain.BLOCK_HEIGHT = 70;
+Terrain.BLOCK_WIDTH = 70;
 
 export default Terrain;

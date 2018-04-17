@@ -1,10 +1,12 @@
+import { spriteLocations } from "./sprites";
+
 class Player {
-  constructor(pos, sprites, minSpeed = 5) {
+  constructor(pos, minSpeed = 5) {
     this.pos = pos;
-    this.sprites = sprites;
+    this.sprites = spriteLocations.player;
     this.minSpeed = minSpeed;
     this.velocity = [0, 0];
-    this.onGround = true;
+    this.onGround = false;
   }
 
   getSpeed() {

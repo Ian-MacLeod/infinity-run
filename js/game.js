@@ -1,9 +1,10 @@
 import Terrain from "./terrain";
 import Player from "./player";
-import { spriteLocations, loadSprites } from "./sprites";
+import { loadSprites } from "./sprites";
 
 class Game {
   constructor(ctx, input) {
+    loadSprites(() => this.start());
     this.ctx = ctx;
     this.input = input;
     this.terrainObjects = [];
@@ -11,13 +12,10 @@ class Game {
     this.playing = true;
     this.newFrame = this.newFrame.bind(this);
     this.gameOver = this.gameOver.bind(this);
-    this.loadedSprites = false;
-    this.sprites = spriteLocations;
-    loadSprites(() => this.start());
-    this.player = new Player([200, 105], this.sprites.player);
   }
 
   start() {
+    this.player = new Player([200, 105]);
     const terrain = new Terrain(100, 100, 700);
     this.terrainObjects = [terrain];
     this.input.attachHandlers();
