@@ -1,11 +1,9 @@
-const PLAYER_HEIGHT = 30;
-const PLAYER_WIDTH = 10;
-
 class Player {
-  constructor(pos) {
+  constructor(pos, minSpeed = 5) {
     this.pos = pos;
     this.velocity = [0, 0];
     this.onGround = true;
+    this.minSpeed = minSpeed;
   }
 
   getSpeed() {
@@ -15,37 +13,45 @@ class Player {
   draw(ctx) {
     ctx.fillStyle = "#47d";
     ctx.fillRect(
-      this.pos[0] - PLAYER_WIDTH,
-      500 - (this.pos[1] + PLAYER_HEIGHT),
-      PLAYER_WIDTH,
-      PLAYER_HEIGHT
+      this.pos[0] - Player.WIDTH,
+      500 - (this.pos[1] + Player.HEIGHT),
+      Player.WIDTH,
+      Player.HEIGHT
     );
   }
 
-  nextState(input) {
+  nextState(input, delta) {
     if (input.isPressed.right) {
       this.velocity[0] = Math.min(
-        this.velocity[0] + Player.ACCELERATION,
+        this.velocity[0] + this.currentAcceleration() * delta,
         Player.MAX_SPEED
       );
     } else if (input.isPressed.left) {
       this.velocity[0] = Math.max(
-        this.velocity[0] - Player.ACCELERATION,
-        -Player.MAX_SPEED
+        this.velocity[0] - this.currentAcceleration() * delta,
+        this.minSpeed
       );
     }
     if (input.isPressed.space && this.onGround) {
       this.velocity[1] = Player.JUMP_VELOCITY;
       this.onGround = false;
     }
-    this.velocity[1] -= 3;
+    this.velocity[1] += Player.GRAVITY;
     this.pos[1] += this.velocity[1];
   }
 
-  boundBy(terrainObjects) {
+  currentAcceleration() {
+    return this.onGround ? Player.ACCELERATION : Player.DIRECTIONAL_INFLUENCE;
+  }
+
+  boundBy(terrainObjects, gameOver, prevPos) {
     terrainObjects.forEach(terrain => {
       if (terrain.contains(this.pos)) {
-        this.hitGround(terrain.height);
+        if (prevPos[1] >= terrain.height) {
+          this.hitGround(terrain.height);
+        } else {
+          gameOver();
+        }
       }
     });
   }
@@ -57,9 +63,13 @@ class Player {
   }
 }
 
+Player.WIDTH = 10;
+Player.HEIGHT = 30;
 Player.MIN_SPEED = 5;
 Player.MAX_SPEED = 10;
-Player.ACCELERATION = 3;
-Player.JUMP_VELOCITY = 40;
+Player.ACCELERATION = 2;
+Player.DIRECTIONAL_INFLUENCE = 0.5;
+Player.JUMP_VELOCITY = 15;
+Player.GRAVITY = -1;
 
 export default Player;

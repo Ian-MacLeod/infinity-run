@@ -32,7 +32,7 @@ class Terrain {
 
   contains(pos) {
     return (
-      this.start <= pos[0] && this.getEnd() >= pos[0] && this.height >= pos[1]
+      this.start < pos[0] && this.getEnd() > pos[0] && this.height > pos[1]
     );
   }
 
@@ -41,8 +41,8 @@ class Terrain {
     ctx.fillRect(this.start, 500 - this.height, this.width, this.height);
   }
 
-  nextState(playerSpeed) {
-    this.start -= playerSpeed;
+  nextState(playerSpeed, delta) {
+    this.start -= playerSpeed * delta;
   }
 }
 

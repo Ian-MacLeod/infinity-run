@@ -5,37 +5,50 @@ class Game {
   constructor(ctx, input) {
     this.ctx = ctx;
     this.input = input;
-    this.player = new Player([200, 100]);
+    this.player = new Player([200, 105]);
     this.terrainObjects = [];
+    this.distance = 0;
+    this.playing = true;
     this.newFrame = this.newFrame.bind(this);
+    this.gameOver = this.gameOver.bind(this);
   }
 
   start() {
     const terrain = new Terrain(100, 100, 700);
     this.terrainObjects = [terrain];
     this.input.attachHandlers();
-    setInterval(this.newFrame, 33);
+    this.lastTime = 0;
+    requestAnimationFrame(this.newFrame);
   }
 
-  newFrame() {
-    this.nextState();
+  newFrame(time) {
+    const scaledDelta = (time - this.lastTime) / 16;
+    this.lastTime = time;
+    this.distance += scaledDelta * this.player.getSpeed();
+    this.nextState(scaledDelta);
     this.drawFrame();
+    if (this.playing) {
+      requestAnimationFrame(this.newFrame);
+    }
   }
 
-  nextState() {
-    this.updateTerrainState();
-    this.updatePlayerState();
+  nextState(delta) {
+    this.updateTerrainState(delta);
+    this.updatePlayerState(delta);
     this.destroyOldObjects();
     this.createNewObjects();
   }
 
-  updateTerrainState() {
-    this.terrainObjects.forEach(obj => obj.nextState(this.player.getSpeed()));
+  updateTerrainState(delta) {
+    this.terrainObjects.forEach(obj =>
+      obj.nextState(this.player.getSpeed(), delta)
+    );
   }
 
-  updatePlayerState() {
-    this.player.nextState(this.input);
-    this.player.boundBy(this.terrainObjects);
+  updatePlayerState(delta) {
+    const prevPos = Array.from(this.player.pos);
+    this.player.nextState(this.input, delta);
+    this.player.boundBy(this.terrainObjects, this.gameOver, prevPos);
   }
 
   drawFrame() {
@@ -56,6 +69,12 @@ class Game {
     if (lastTerrain.getEnd() < Game.WIDTH) {
       this.terrainObjects.push(Terrain.fromLastTerrain(lastTerrain));
     }
+  }
+
+  gameOver() {
+    console.log(this.player.pos);
+    alert(`You ran for ${Math.floor(this.distance / 40)} meters.`);
+    this.playing = false;
   }
 }
 
