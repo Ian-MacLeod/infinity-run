@@ -1,16 +1,20 @@
 import Terrain from "./terrain";
 import Player from "./player";
+import { spriteLocations, loadSprites } from "./sprites";
 
 class Game {
   constructor(ctx, input) {
     this.ctx = ctx;
     this.input = input;
-    this.player = new Player([200, 105]);
     this.terrainObjects = [];
     this.distance = 0;
     this.playing = true;
     this.newFrame = this.newFrame.bind(this);
     this.gameOver = this.gameOver.bind(this);
+    this.loadedSprites = false;
+    this.sprites = spriteLocations;
+    loadSprites(() => this.start());
+    this.player = new Player([200, 105], this.sprites.player);
   }
 
   start() {
@@ -52,10 +56,10 @@ class Game {
   }
 
   drawFrame() {
-    this.ctx.fillStyle = "white";
+    this.ctx.fillStyle = "#333";
     this.ctx.fillRect(0, 0, Game.WIDTH, Game.HEIGHT);
     this.terrainObjects.forEach(obj => obj.draw(this.ctx));
-    this.player.draw(this.ctx);
+    this.player.draw(this.ctx, this.distance);
   }
 
   destroyOldObjects() {

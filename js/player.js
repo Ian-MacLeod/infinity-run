@@ -1,18 +1,23 @@
 class Player {
-  constructor(pos, minSpeed = 5) {
+  constructor(pos, sprites, minSpeed = 5) {
     this.pos = pos;
+    this.sprites = sprites;
+    this.minSpeed = minSpeed;
     this.velocity = [0, 0];
     this.onGround = true;
-    this.minSpeed = minSpeed;
   }
 
   getSpeed() {
     return this.velocity[0];
   }
 
-  draw(ctx) {
+  draw(ctx, distance) {
     ctx.fillStyle = "#47d";
-    ctx.fillRect(
+    ctx.drawImage(
+      this.sprites.imageEl,
+      ...this.sprites.locations.run[
+        Math.floor(distance / 10) % this.sprites.locations.run.length
+      ],
       this.pos[0] - Player.WIDTH,
       500 - (this.pos[1] + Player.HEIGHT),
       Player.WIDTH,
@@ -63,8 +68,8 @@ class Player {
   }
 }
 
-Player.WIDTH = 10;
-Player.HEIGHT = 30;
+Player.WIDTH = 36;
+Player.HEIGHT = 48;
 Player.MIN_SPEED = 5;
 Player.MAX_SPEED = 10;
 Player.ACCELERATION = 2;

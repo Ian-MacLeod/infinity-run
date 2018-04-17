@@ -10,5 +10,4 @@ document.addEventListener("DOMContentLoaded", () => {
   const ctx = canvasEl.getContext("2d");
   const input = new Input();
   const game = new Game(ctx, input);
-  game.start();
 });
