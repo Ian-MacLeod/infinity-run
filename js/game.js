@@ -5,14 +5,14 @@ class Game {
   constructor(ctx, input) {
     this.ctx = ctx;
     this.input = input;
-    this.gameObjects = [];
+    this.player = new Player([200, 100]);
+    this.terrainObjects = [];
     this.newFrame = this.newFrame.bind(this);
   }
 
   start() {
     const terrain = new Terrain(100, 100, 700);
-    const player = new Player([200, 100]);
-    this.gameObjects = [terrain, player];
+    this.terrainObjects = [terrain];
     this.input.attachHandlers();
     setInterval(this.newFrame, 33);
   }
@@ -23,13 +23,39 @@ class Game {
   }
 
   nextState() {
-    this.gameObjects.forEach(obj => obj.nextState(this.input));
+    this.updateTerrainState();
+    this.updatePlayerState();
+    this.destroyOldObjects();
+    this.createNewObjects();
+  }
+
+  updateTerrainState() {
+    this.terrainObjects.forEach(obj => obj.nextState(this.player.getSpeed()));
+  }
+
+  updatePlayerState() {
+    this.player.nextState(this.input);
+    this.player.boundBy(this.terrainObjects);
   }
 
   drawFrame() {
     this.ctx.fillStyle = "white";
     this.ctx.fillRect(0, 0, Game.WIDTH, Game.HEIGHT);
-    this.gameObjects.forEach(obj => obj.draw(this.ctx));
+    this.terrainObjects.forEach(obj => obj.draw(this.ctx));
+    this.player.draw(this.ctx);
+  }
+
+  destroyOldObjects() {
+    if (this.terrainObjects[0].getEnd() < 0) {
+      this.terrainObjects.slice(0, 1);
+    }
+  }
+
+  createNewObjects() {
+    const lastTerrain = this.terrainObjects[this.terrainObjects.length - 1];
+    if (lastTerrain.getEnd() < Game.WIDTH) {
+      this.terrainObjects.push(Terrain.fromLastTerrain(lastTerrain));
+    }
   }
 }
 

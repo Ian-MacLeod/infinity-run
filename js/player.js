@@ -8,6 +8,10 @@ class Player {
     this.onGround = true;
   }
 
+  getSpeed() {
+    return this.velocity[0];
+  }
+
   draw(ctx) {
     ctx.fillStyle = "#47d";
     ctx.fillRect(
@@ -35,20 +39,27 @@ class Player {
       this.onGround = false;
     }
     this.velocity[1] -= 3;
-    this.pos[0] += this.velocity[0];
     this.pos[1] += this.velocity[1];
+  }
 
-    if (this.pos[1] < 100) {
-      this.pos[1] = 100;
-      this.velocity[1] = 0;
-      this.onGround = true;
-    }
+  boundBy(terrainObjects) {
+    terrainObjects.forEach(terrain => {
+      if (terrain.contains(this.pos)) {
+        this.hitGround(terrain.height);
+      }
+    });
+  }
+
+  hitGround(height) {
+    this.onGround = true;
+    this.pos[1] = height;
+    this.velocity[1] = 0;
   }
 }
 
 Player.MIN_SPEED = 5;
 Player.MAX_SPEED = 10;
 Player.ACCELERATION = 3;
-Player.JUMP_VELOCITY = 30;
+Player.JUMP_VELOCITY = 40;
 
 export default Player;
