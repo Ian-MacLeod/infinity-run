@@ -2,6 +2,7 @@ import { randRange, drawFlipped } from "./utils";
 import { spriteLocations } from "./sprites";
 import GameObject from "./gameObject";
 import Game from "./game";
+import Player from "./player";
 
 class Terrain extends GameObject {
   constructor(pos, width, height) {
@@ -9,35 +10,78 @@ class Terrain extends GameObject {
     this.sprites = spriteLocations.environment;
   }
 
-  static fromLastTerrain(lastTerrain) {
-    const pos = this.nextPos(lastTerrain.getRight(), lastTerrain.getTop());
-    const height = Math.max(Game.HEIGHT - pos[1], 2 * Terrain.BLOCK_HEIGHT);
-    const width = this.nextWidth();
-    if (randRange(0, 2) === 0) {
-      return new Terrain(pos, width, height);
-    } else {
-      return new Terrain([pos[0], 0], width, height);
-    }
-  }
-
-  static nextPos(lastRight, lastTop) {
-    return [
-      lastRight + randRange(100, 250),
-      Game.HEIGHT - randRange(1, 3) * Terrain.BLOCK_HEIGHT
-    ];
-  }
-
-  static nextWidth() {
-    return randRange(1, 10) * Terrain.BLOCK_WIDTH;
-  }
-
-  contains(pos) {
-    return (
-      this.pos[0] < pos[0] &&
-      this.getRight() > pos[0] &&
-      this.pos[1] < pos[1] &&
-      this.pos[1] + this.height > pos[1]
+  flipped() {
+    return new Terrain(
+      [this.pos[0], Game.HEIGHT - (this.pos[1] + this.height)],
+      this.width,
+      this.height
     );
+  }
+
+  isTop() {
+    return this.pos[1] <= 0;
+  }
+
+  static fromLastTerrain(lastTerrain) {
+    let shouldFlip = false;
+    if (lastTerrain.isTop()) {
+      lastTerrain = lastTerrain.flipped();
+      shouldFlip = true;
+    }
+
+    let newTerrain;
+    if (randRange(0, 2) === 0) {
+      newTerrain = this.newEasyFlippedTerrain(
+        lastTerrain.getRight(),
+        lastTerrain.getTop()
+      );
+    } else {
+      newTerrain = this.newEasyTerrain(
+        lastTerrain.getRight(),
+        lastTerrain.getTop()
+      );
+    }
+
+    if (shouldFlip) {
+      newTerrain = newTerrain.flipped();
+    }
+    return newTerrain;
+  }
+
+  static newEasyFlippedTerrain(lastRight, lastTop) {
+    const bottom = randRange(1, 3) * Terrain.BLOCK_HEIGHT;
+    const maxGap = this.maxJumpableGap(lastRight, -lastTop, -bottom, 0);
+    const left = lastRight + randRange(-0.2 * maxGap, 0.2 * maxGap);
+    const width = randRange(6, 14) * Terrain.BLOCK_HEIGHT;
+
+    return new Terrain(
+      [left, bottom - 4 * Terrain.BLOCK_HEIGHT],
+      width,
+      4 * Terrain.BLOCK_HEIGHT
+    );
+  }
+
+  static newEasyTerrain(lastRight, lastTop) {
+    const top = Game.HEIGHT - randRange(1, 3) * Terrain.BLOCK_HEIGHT;
+    const maxGap = this.maxJumpableGap(
+      lastRight,
+      lastTop,
+      top,
+      Player.JUMP_VELOCITY
+    );
+    const left = lastRight + randRange(0.2 * maxGap, 0.5 * maxGap);
+    const width = randRange(6, 14) * Terrain.BLOCK_HEIGHT;
+
+    return new Terrain([left, top], width, 4 * Terrain.BLOCK_HEIGHT);
+  }
+
+  static maxJumpableGap(lastRight, lastTop, newTop, v0) {
+    const g = Player.GRAVITY;
+    const dy = newTop - lastTop;
+    const jumpTime = (-v0 + Math.pow(Math.pow(v0, 2) + 2 * g * dy, 0.5)) / g;
+    const gap = jumpTime * Player.MAX_SPEED;
+
+    return gap;
   }
 
   draw(ctx) {

@@ -83,6 +83,6 @@ class Game {
 }
 
 Game.WIDTH = 1000;
-Game.HEIGHT = 500;
+Game.HEIGHT = 600;
 
 export default Game;
