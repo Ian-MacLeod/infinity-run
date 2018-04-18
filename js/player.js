@@ -1,5 +1,6 @@
 import { spriteLocations } from "./sprites";
 import GameObject from "./gameObject";
+import { drawFlipped } from "./utils";
 
 class Player extends GameObject {
   constructor(pos, game, minSpeed = 5) {
@@ -17,8 +18,7 @@ class Player extends GameObject {
   }
 
   draw(ctx, distance) {
-    ctx.fillStyle = "#47d";
-    ctx.drawImage(
+    const drawArgs = [
       this.sprites.imageEl,
       ...this.sprites.locations.run[
         Math.floor(distance / 10) % this.sprites.locations.run.length
@@ -27,7 +27,12 @@ class Player extends GameObject {
       this.pos[1],
       Player.WIDTH,
       Player.HEIGHT
-    );
+    ];
+    if (this.gravityMultiplier < 0) {
+      drawFlipped(ctx, ...drawArgs, true);
+    } else {
+      ctx.drawImage(...drawArgs);
+    }
   }
 
   nextState(input, delta) {
