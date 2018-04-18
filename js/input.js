@@ -27,6 +27,9 @@ class Input {
       case keyCodes.SPACE:
         this.isPressed.space = true;
         break;
+      case keyCodes.G:
+        this.isPressed.g = true;
+        break;
     }
   }
 
@@ -40,6 +43,9 @@ class Input {
         break;
       case keyCodes.SPACE:
         this.isPressed.space = false;
+        break;
+      case keyCodes.G:
+        this.isPressed.g = false;
         break;
     }
   }

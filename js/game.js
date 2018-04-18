@@ -15,8 +15,8 @@ class Game {
   }
 
   start() {
-    this.player = new Player([200, 105]);
-    const terrain = new Terrain(100, 100, 700);
+    this.player = new Player([200, 200], this);
+    const terrain = new Terrain([100, 400], 700, 100);
     this.terrainObjects = [terrain];
     this.input.attachHandlers();
     this.lastTime = 0;
@@ -48,9 +48,11 @@ class Game {
   }
 
   updatePlayerState(delta) {
-    const prevPos = Array.from(this.player.pos);
     this.player.nextState(this.input, delta);
-    this.player.boundBy(this.terrainObjects, this.gameOver, prevPos);
+    this.player.boundBy(this.terrainObjects);
+    if (this.player.pos[1] > Game.HEIGHT) {
+      this.gameOver();
+    }
   }
 
   drawFrame() {
@@ -61,14 +63,14 @@ class Game {
   }
 
   destroyOldObjects() {
-    if (this.terrainObjects[0].getEnd() < 0) {
+    if (this.terrainObjects[0].getRight() < 0) {
       this.terrainObjects.slice(0, 1);
     }
   }
 
   createNewObjects() {
     const lastTerrain = this.terrainObjects[this.terrainObjects.length - 1];
-    if (lastTerrain.getEnd() < Game.WIDTH) {
+    if (lastTerrain.getRight() < Game.WIDTH) {
       this.terrainObjects.push(Terrain.fromLastTerrain(lastTerrain));
     }
   }

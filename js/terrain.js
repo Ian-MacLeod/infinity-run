@@ -1,31 +1,29 @@
 import { randRange } from "./utils";
 import { spriteLocations } from "./sprites";
+import GameObject from "./gameObject";
 
-class Terrain {
-  constructor(start, height, width) {
-    this.start = start;
-    this.height = height;
-    this.width = width;
+class Terrain extends GameObject {
+  constructor(pos, width, height) {
+    super(pos, width, height);
     this.sprites = spriteLocations.environment;
   }
 
-  getEnd() {
-    return this.start + this.width;
-  }
-
   static fromLastTerrain(lastTerrain) {
-    const start = this.nextStart(lastTerrain.getEnd());
-    const height = this.nextHeight(lastTerrain.height);
+    const pos = this.nextPos(lastTerrain.getRight(), lastTerrain.getTop());
+    const height = pos[1];
     const width = this.nextWidth();
-    return new Terrain(start, height, width);
+    return new Terrain(pos, height, width);
   }
 
   static nextHeight(lastHeight) {
-    return randRange(50, 250);
+    return randRange(1, 3) * Terrain.BLOCK_HEIGHT;
   }
 
-  static nextStart(lastEnd) {
-    return lastEnd + randRange(100, 300);
+  static nextPos(lastRight, lastTop) {
+    return [
+      lastRight + randRange(100, 250),
+      500 - randRange(1, 3) * Terrain.BLOCK_HEIGHT
+    ];
   }
 
   static nextWidth() {
@@ -34,7 +32,10 @@ class Terrain {
 
   contains(pos) {
     return (
-      this.start < pos[0] && this.getEnd() > pos[0] && this.height > pos[1]
+      this.pos[0] < pos[0] &&
+      this.getRight() > pos[0] &&
+      this.pos[1] < pos[1] &&
+      this.pos[1] + this.height > pos[1]
     );
   }
 
@@ -49,8 +50,8 @@ class Terrain {
         ctx.drawImage(
           this.sprites.imageEl,
           ...this.sprites.locations[tile],
-          Math.floor(this.start + col * Terrain.BLOCK_WIDTH),
-          500 - this.height + row * Terrain.BLOCK_HEIGHT,
+          Math.floor(this.pos[0] + col * Terrain.BLOCK_WIDTH),
+          this.pos[1] + row * Terrain.BLOCK_HEIGHT,
           Terrain.BLOCK_WIDTH,
           Terrain.BLOCK_HEIGHT
         );
@@ -67,7 +68,7 @@ class Terrain {
   }
 
   nextState(playerSpeed, delta) {
-    this.start -= playerSpeed * delta;
+    this.pos[0] -= playerSpeed * delta;
   }
 }
 
