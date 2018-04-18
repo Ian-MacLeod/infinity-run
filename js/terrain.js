@@ -1,6 +1,7 @@
-import { randRange } from "./utils";
+import { randRange, drawFlipped } from "./utils";
 import { spriteLocations } from "./sprites";
 import GameObject from "./gameObject";
+import Game from "./game";
 
 class Terrain extends GameObject {
   constructor(pos, width, height) {
@@ -10,19 +11,19 @@ class Terrain extends GameObject {
 
   static fromLastTerrain(lastTerrain) {
     const pos = this.nextPos(lastTerrain.getRight(), lastTerrain.getTop());
-    const height = pos[1];
+    const height = Math.max(Game.HEIGHT - pos[1], 2 * Terrain.BLOCK_HEIGHT);
     const width = this.nextWidth();
-    return new Terrain(pos, height, width);
-  }
-
-  static nextHeight(lastHeight) {
-    return randRange(1, 3) * Terrain.BLOCK_HEIGHT;
+    if (randRange(0, 2) === 0) {
+      return new Terrain(pos, width, height);
+    } else {
+      return new Terrain([pos[0], 0], width, height);
+    }
   }
 
   static nextPos(lastRight, lastTop) {
     return [
       lastRight + randRange(100, 250),
-      500 - randRange(1, 3) * Terrain.BLOCK_HEIGHT
+      Game.HEIGHT - randRange(1, 3) * Terrain.BLOCK_HEIGHT
     ];
   }
 
@@ -47,14 +48,27 @@ class Terrain extends GameObject {
         if (row === 0) {
           tile = "stoneMid";
         }
-        ctx.drawImage(
-          this.sprites.imageEl,
-          ...this.sprites.locations[tile],
-          Math.floor(this.pos[0] + col * Terrain.BLOCK_WIDTH),
-          this.pos[1] + row * Terrain.BLOCK_HEIGHT,
-          Terrain.BLOCK_WIDTH,
-          Terrain.BLOCK_HEIGHT
-        );
+        if (row >= this.getBlockHeight() - 1) {
+          tile = "stoneMid";
+          drawFlipped(
+            ctx,
+            this.sprites.imageEl,
+            ...this.sprites.locations[tile],
+            Math.floor(this.pos[0] + col * Terrain.BLOCK_WIDTH),
+            this.pos[1] + row * Terrain.BLOCK_HEIGHT,
+            Terrain.BLOCK_WIDTH,
+            Terrain.BLOCK_HEIGHT
+          );
+        } else {
+          ctx.drawImage(
+            this.sprites.imageEl,
+            ...this.sprites.locations[tile],
+            Math.floor(this.pos[0] + col * Terrain.BLOCK_WIDTH),
+            this.pos[1] + row * Terrain.BLOCK_HEIGHT,
+            Terrain.BLOCK_WIDTH,
+            Terrain.BLOCK_HEIGHT
+          );
+        }
       }
     }
   }

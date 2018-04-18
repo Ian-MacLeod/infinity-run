@@ -11,3 +11,11 @@ export const rangeOverlap = (range1, range2) => {
   }
   return 0;
 };
+
+export const drawFlipped = (ctx, image, sX, sY, sH, sW, x, y, h, w) => {
+  ctx.save();
+  ctx.translate(x + w / 2, y + h / 2);
+  ctx.rotate(Math.PI);
+  ctx.drawImage(image, sX, sY, sH, sW, -w / 2, -h / 2, h, w);
+  ctx.restore();
+};

@@ -86,6 +86,6 @@ Player.MAX_SPEED = 10;
 Player.ACCELERATION = 2;
 Player.DIRECTIONAL_INFLUENCE = 0.5;
 Player.JUMP_VELOCITY = -15;
-Player.GRAVITY = 1;
+Player.GRAVITY = 0.6;
 
 export default Player;
