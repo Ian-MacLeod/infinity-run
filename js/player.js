@@ -41,7 +41,7 @@ class Player extends GameObject {
     if (input.isPressed.space && this.onGround) {
       this.velocity[1] = Player.JUMP_VELOCITY * this.gravityMultiplier;
     }
-    this.velocity[1] += Player.GRAVITY * this.gravityMultiplier;
+    this.velocity[1] += this.game.gravity * this.gravityMultiplier;
     this.pos[1] += this.velocity[1];
   }
 

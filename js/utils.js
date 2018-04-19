@@ -29,6 +29,7 @@ export const drawFlipped = (
   ctx.translate(x + w / 2, y + h / 2);
   if (reverse) {
     ctx.scale(-1, 1);
+    ctx.translate(0, 10);
   }
   ctx.rotate(Math.PI);
   ctx.drawImage(image, sX, sY, sH, sW, -w / 2, -h / 2, h, w);

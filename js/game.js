@@ -4,25 +4,24 @@ import { spriteLocations, loadSprites } from "./sprites";
 
 class Game {
   constructor(ctx, input) {
-    loadSprites(() => this.start());
+    loadSprites(() => {});
     this.ctx = ctx;
     this.input = input;
-    this.terrainObjects = [];
-    this.backgroundObjects = [];
     this.distance = 0;
-
-    this.playing = true;
     this.newFrame = this.newFrame.bind(this);
     this.gameOver = this.gameOver.bind(this);
   }
 
   start() {
+    this.playing = true;
     this.player = new Player([200, 200], this);
-    this.speed = Game.INITIAL_SPEED;
     const terrain = new Terrain([100, 400], 700, 100);
     this.terrainObjects = [terrain];
-    this.input.attachHandlers();
+    this.speed = Game.INITIAL_SPEED;
     this.lastTime = 0;
+    this.difficulty = 0;
+    this.gravity = Game.INITIAL_GRAVITY;
+    this.input.attachHandlers();
     requestAnimationFrame(this.newFrame);
   }
 
@@ -32,8 +31,12 @@ class Game {
     if (this.lastTime !== 0) {
       scaledDelta = (time - this.lastTime) / 16;
     }
-    this.lastTime = time;
+    if (this.difficulty < 0.4) {
+      this.difficulty += scaledDelta * Game.DIFFICULTY_RATING_GROWTH;
+    }
+    this.gravity += scaledDelta * Game.GRAVITY_GROWTH_RATE;
     this.distance += scaledDelta * this.speed;
+    this.lastTime = time;
     this.nextState(scaledDelta);
     this.drawFrame();
     if (this.playing) {
@@ -123,7 +126,7 @@ class Game {
 
   destroyOldObjects() {
     if (this.terrainObjects[0].getRight() < 0) {
-      this.terrainObjects.slice(0, 1);
+      this.terrainObjects.splice(0, 1);
     }
   }
 
@@ -131,7 +134,7 @@ class Game {
     const lastTerrain = this.terrainObjects[this.terrainObjects.length - 1];
     if (lastTerrain.getRight() < Game.WIDTH) {
       this.terrainObjects.push(
-        Terrain.fromLastTerrain(lastTerrain, this.speed)
+        Terrain.fromLastTerrain(lastTerrain, this.speed, this.difficulty)
       );
     }
   }
@@ -142,8 +145,11 @@ class Game {
   }
 }
 
+Game.INITIAL_GRAVITY = 0.6;
+Game.GRAVITY_GROWTH_RATE = 0;
 Game.INITIAL_SPEED = 5;
 Game.ACCELERATION = 1 / 6000;
+Game.DIFFICULTY_RATING_GROWTH = 1 / 5000;
 Game.WIDTH = 1000;
 Game.HEIGHT = 600;
 

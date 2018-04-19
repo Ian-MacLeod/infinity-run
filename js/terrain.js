@@ -22,7 +22,7 @@ class Terrain extends GameObject {
     return this.pos[1] <= 0;
   }
 
-  static fromLastTerrain(lastTerrain, speed) {
+  static fromLastTerrain(lastTerrain, speed, difficulty) {
     let shouldFlip = false;
     if (lastTerrain.isTop()) {
       lastTerrain = lastTerrain.flipped();
@@ -31,17 +31,9 @@ class Terrain extends GameObject {
 
     let newTerrain;
     if (randRange(0, 2) === 0) {
-      newTerrain = this.newEasyFlippedTerrain(
-        lastTerrain.getRight(),
-        lastTerrain.getTop(),
-        speed
-      );
+      newTerrain = this.newFlippedTerrain(lastTerrain, speed, difficulty);
     } else {
-      newTerrain = this.newEasyTerrain(
-        lastTerrain.getRight(),
-        lastTerrain.getTop(),
-        speed
-      );
+      newTerrain = this.newTerrain(lastTerrain, speed, difficulty);
     }
 
     if (shouldFlip) {
@@ -50,30 +42,33 @@ class Terrain extends GameObject {
     return newTerrain;
   }
 
-  static newEasyFlippedTerrain(lastRight, lastTop, speed) {
+  static newFlippedTerrain(lastTerrain, speed, difficulty) {
     const bottom = randRange(1, 3) * Terrain.BLOCK_HEIGHT;
-    const maxGap = this.maxJumpableGap(speed, lastTop - bottom, 0);
-    const left = lastRight + randRange(-0.2 * maxGap, 0.2 * maxGap);
-    const width = randRange(6, 14) * Terrain.BLOCK_HEIGHT;
+    const maxGap = this.maxJumpableGap(speed, lastTerrain.getTop() - bottom, 0);
+    const left =
+      lastTerrain.getRight() +
+      randRange(
+        (-0.2 + difficulty * 1.7) * maxGap,
+        (0.2 + difficulty * 1.7) * maxGap
+      );
+    const width = randRange(4, 15) * Terrain.BLOCK_HEIGHT;
 
-    return new Terrain(
-      [left, bottom - 4 * Terrain.BLOCK_HEIGHT],
-      width,
-      4 * Terrain.BLOCK_HEIGHT
-    );
+    return new Terrain([left, bottom - Terrain.HEIGHT], width, Terrain.HEIGHT);
   }
 
-  static newEasyTerrain(lastRight, lastTop, speed) {
+  static newTerrain(lastTerrain, speed, difficulty) {
     const top = Game.HEIGHT - randRange(1, 3) * Terrain.BLOCK_HEIGHT;
     const maxGap = this.maxJumpableGap(
       speed,
-      top - lastTop,
+      top - lastTerrain.getTop(),
       Player.JUMP_VELOCITY
     );
-    const left = lastRight + randRange(0.2 * maxGap, 0.5 * maxGap);
+    const left =
+      lastTerrain.getRight() +
+      randRange((0.2 + difficulty) * maxGap, (0.5 + difficulty) * maxGap);
     const width = randRange(6, 14) * Terrain.BLOCK_HEIGHT;
 
-    return new Terrain([left, top], width, 4 * Terrain.BLOCK_HEIGHT);
+    return new Terrain([left, top], width, Terrain.HEIGHT);
   }
 
   static maxJumpableGap(speed, dy, v0) {
@@ -132,5 +127,6 @@ class Terrain extends GameObject {
 
 Terrain.BLOCK_HEIGHT = 70;
 Terrain.BLOCK_WIDTH = 70;
+Terrain.HEIGHT = 4 * Terrain.BLOCK_HEIGHT;
 
 export default Terrain;
