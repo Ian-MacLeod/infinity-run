@@ -3,11 +3,10 @@ import GameObject from "./gameObject";
 import { drawFlipped } from "./utils";
 
 class Player extends GameObject {
-  constructor(pos, game, speed) {
+  constructor(pos, game) {
     super(pos, Player.WIDTH, Player.HEIGHT);
     this.game = game;
     this.sprites = spriteLocations.player;
-    this.speed = speed;
     this.velocity = [0, 0];
     this.onGround = false;
     this.gravityMultiplier = 1;
@@ -61,7 +60,10 @@ class Player extends GameObject {
   }
 
   hitTerrain(collision) {
-    if (Math.abs(collision[0]) > Math.abs(collision[1])) {
+    if (
+      Math.abs(collision[0]) > Math.abs(collision[1]) - 10 ||
+      collision[0] > 0
+    ) {
       this.pos[1] += collision[1];
       if (collision[1] < 0 !== this.gravityMultiplier < 0) {
         this.onGround = true;
