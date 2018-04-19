@@ -17,7 +17,7 @@ class Game {
   }
 
   start() {
-    this.player = new Player([200, 200]);
+    this.player = new Player([200, 200], this);
     this.speed = Game.INITIAL_SPEED;
     const terrain = new Terrain([100, 400], 700, 100);
     this.terrainObjects = [terrain];
@@ -28,7 +28,10 @@ class Game {
 
   newFrame(time) {
     this.speed = Game.INITIAL_SPEED + time * Game.ACCELERATION;
-    const scaledDelta = (time - this.lastTime) / 16;
+    let scaledDelta = 0;
+    if (this.lastTime !== 0) {
+      scaledDelta = (time - this.lastTime) / 16;
+    }
     this.lastTime = time;
     this.distance += scaledDelta * this.speed;
     this.nextState(scaledDelta);
@@ -139,8 +142,8 @@ class Game {
   }
 }
 
-Game.INITIAL_SPEED = 0;
-Game.ACCELERATION = 1 / 600;
+Game.INITIAL_SPEED = 5;
+Game.ACCELERATION = 1 / 6000;
 Game.WIDTH = 1000;
 Game.HEIGHT = 600;
 
