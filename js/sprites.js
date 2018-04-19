@@ -1,3 +1,12 @@
+export const loadSprites = cb => {
+  for (const spriteType of Object.keys(spriteLocations)) {
+    const imageEl = document.createElement("img");
+    imageEl.src = spriteLocations[spriteType].src;
+    spriteLocations[spriteType].imageEl = imageEl;
+  }
+  setTimeout(cb, 1000);
+};
+
 export const spriteLocations = {
   player: {
     src: "img/player_spritesheet.png",
@@ -21,6 +30,21 @@ export const spriteLocations = {
         [292, 98, 72, 97]
       ]
     }
+  },
+  background: {
+    src: "img/background/parallax-space-background.png"
+  },
+  backgroundStars: {
+    src: "img/background/parallax-space-stars.png"
+  },
+  backgroundFarPlanets: {
+    src: "img/background/parallax-space-far-planets.png"
+  },
+  backgroundRingPlanet: {
+    src: "img/background/parallax-space-ring-planet.png"
+  },
+  backgroundBigPlanet: {
+    src: "img/background/parallax-space-big-planet.png"
   },
   environment: {
     src: "img/tiles_spritesheet.png",
@@ -199,13 +223,4 @@ export const spriteLocations = {
       window: [72, 0, 70, 70]
     }
   }
-};
-
-export const loadSprites = cb => {
-  for (const spriteType of Object.keys(spriteLocations)) {
-    const imageEl = document.createElement("img");
-    imageEl.src = spriteLocations[spriteType].src;
-    spriteLocations[spriteType].imageEl = imageEl;
-  }
-  setTimeout(cb, 1000);
 };

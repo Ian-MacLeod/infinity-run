@@ -7,7 +7,7 @@ class Player extends GameObject {
     super(pos, Player.WIDTH, Player.HEIGHT);
     this.game = game;
     this.sprites = spriteLocations.player;
-    this.minSpeed = 1;
+    this.minSpeed = minSpeed;
     this.velocity = [0, 0];
     this.onGround = false;
     this.gravityMultiplier = 1;
@@ -86,7 +86,6 @@ class Player extends GameObject {
 
 Player.WIDTH = 36;
 Player.HEIGHT = 48;
-Player.MIN_SPEED = 5;
 Player.MAX_SPEED = 10;
 Player.ACCELERATION = 2;
 Player.DIRECTIONAL_INFLUENCE = 0.5;
