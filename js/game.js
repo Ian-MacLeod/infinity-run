@@ -17,7 +17,8 @@ class Game {
   }
 
   start() {
-    this.player = new Player([200, 200], Game.INITIAL_SPEED);
+    this.player = new Player([200, 200]);
+    this.speed = Game.INITIAL_SPEED;
     const terrain = new Terrain([100, 400], 700, 100);
     this.terrainObjects = [terrain];
     this.input.attachHandlers();
@@ -26,10 +27,10 @@ class Game {
   }
 
   newFrame(time) {
-    this.player.speed = Game.INITIAL_SPEED + time / 60000;
+    this.speed = Game.INITIAL_SPEED + time * Game.ACCELERATION;
     const scaledDelta = (time - this.lastTime) / 16;
     this.lastTime = time;
-    this.distance += scaledDelta * this.player.getSpeed();
+    this.distance += scaledDelta * this.speed;
     this.nextState(scaledDelta);
     this.drawFrame();
     if (this.playing) {
@@ -45,9 +46,7 @@ class Game {
   }
 
   updateTerrainState(delta) {
-    this.terrainObjects.forEach(obj =>
-      obj.nextState(this.player.getSpeed(), delta)
-    );
+    this.terrainObjects.forEach(obj => obj.nextState(this.speed, delta));
   }
 
   updatePlayerState(delta) {
@@ -87,7 +86,7 @@ class Game {
       Game.WIDTH,
       Game.HEIGHT
     );
-    start = -((this.distance / 50) % Game.WIDTH);
+    start = -((this.distance / 40) % (Game.WIDTH + 700));
     this.ctx.drawImage(
       spriteLocations.backgroundFarPlanets.imageEl,
       start,
@@ -97,25 +96,25 @@ class Game {
     );
     this.ctx.drawImage(
       spriteLocations.backgroundFarPlanets.imageEl,
-      start + Game.WIDTH,
+      start + Game.WIDTH + 700,
       0,
       Game.WIDTH,
       Game.HEIGHT
     );
-    start = -((this.distance / 30) % Game.WIDTH);
+    start = -((this.distance / 25) % (Game.WIDTH + 300));
     this.ctx.drawImage(
       spriteLocations.backgroundRingPlanet.imageEl,
       start,
-      240,
-      102,
-      230
+      200,
+      153,
+      345
     );
     this.ctx.drawImage(
       spriteLocations.backgroundRingPlanet.imageEl,
-      start + Game.WIDTH,
-      240,
-      102,
-      230
+      start + Game.WIDTH + 300,
+      200,
+      153,
+      345
     );
   }
 
@@ -128,17 +127,20 @@ class Game {
   createNewObjects() {
     const lastTerrain = this.terrainObjects[this.terrainObjects.length - 1];
     if (lastTerrain.getRight() < Game.WIDTH) {
-      this.terrainObjects.push(Terrain.fromLastTerrain(lastTerrain));
+      this.terrainObjects.push(
+        Terrain.fromLastTerrain(lastTerrain, this.speed)
+      );
     }
   }
 
   gameOver() {
-    console.log(this.player.pos);
     alert(`You ran for ${Math.floor(this.distance / 40)} meters.`);
     this.playing = false;
   }
 }
 
+Game.INITIAL_SPEED = 0;
+Game.ACCELERATION = 1 / 600;
 Game.WIDTH = 1000;
 Game.HEIGHT = 600;
 

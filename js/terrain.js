@@ -22,7 +22,7 @@ class Terrain extends GameObject {
     return this.pos[1] <= 0;
   }
 
-  static fromLastTerrain(lastTerrain) {
+  static fromLastTerrain(lastTerrain, speed) {
     let shouldFlip = false;
     if (lastTerrain.isTop()) {
       lastTerrain = lastTerrain.flipped();
@@ -33,12 +33,14 @@ class Terrain extends GameObject {
     if (randRange(0, 2) === 0) {
       newTerrain = this.newEasyFlippedTerrain(
         lastTerrain.getRight(),
-        lastTerrain.getTop()
+        lastTerrain.getTop(),
+        speed
       );
     } else {
       newTerrain = this.newEasyTerrain(
         lastTerrain.getRight(),
-        lastTerrain.getTop()
+        lastTerrain.getTop(),
+        speed
       );
     }
 
@@ -48,9 +50,9 @@ class Terrain extends GameObject {
     return newTerrain;
   }
 
-  static newEasyFlippedTerrain(lastRight, lastTop) {
+  static newEasyFlippedTerrain(lastRight, lastTop, speed) {
     const bottom = randRange(1, 3) * Terrain.BLOCK_HEIGHT;
-    const maxGap = this.maxJumpableGap(lastRight, -lastTop, -bottom, 0);
+    const maxGap = this.maxJumpableGap(speed, lastTop - bottom, 0);
     const left = lastRight + randRange(-0.2 * maxGap, 0.2 * maxGap);
     const width = randRange(6, 14) * Terrain.BLOCK_HEIGHT;
 
@@ -61,12 +63,11 @@ class Terrain extends GameObject {
     );
   }
 
-  static newEasyTerrain(lastRight, lastTop) {
+  static newEasyTerrain(lastRight, lastTop, speed) {
     const top = Game.HEIGHT - randRange(1, 3) * Terrain.BLOCK_HEIGHT;
     const maxGap = this.maxJumpableGap(
-      lastRight,
-      lastTop,
-      top,
+      speed,
+      top - lastTop,
       Player.JUMP_VELOCITY
     );
     const left = lastRight + randRange(0.2 * maxGap, 0.5 * maxGap);
@@ -75,11 +76,10 @@ class Terrain extends GameObject {
     return new Terrain([left, top], width, 4 * Terrain.BLOCK_HEIGHT);
   }
 
-  static maxJumpableGap(lastRight, lastTop, newTop, v0) {
+  static maxJumpableGap(speed, dy, v0) {
     const g = Player.GRAVITY;
-    const dy = newTop - lastTop;
     const jumpTime = (-v0 + Math.pow(Math.pow(v0, 2) + 2 * g * dy, 0.5)) / g;
-    const gap = jumpTime * Player.MAX_SPEED;
+    const gap = jumpTime * speed;
 
     return gap;
   }

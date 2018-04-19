@@ -3,11 +3,11 @@ import GameObject from "./gameObject";
 import { drawFlipped } from "./utils";
 
 class Player extends GameObject {
-  constructor(pos, game, minSpeed = 5) {
+  constructor(pos, game, speed) {
     super(pos, Player.WIDTH, Player.HEIGHT);
     this.game = game;
     this.sprites = spriteLocations.player;
-    this.minSpeed = minSpeed;
+    this.speed = speed;
     this.velocity = [0, 0];
     this.onGround = false;
     this.gravityMultiplier = 1;
@@ -39,17 +39,6 @@ class Player extends GameObject {
     if (this.onGround && input.isPressed.g) {
       this.gravityMultiplier *= -1;
     }
-    if (input.isPressed.right) {
-      this.velocity[0] = Math.min(
-        this.velocity[0] + this.currentAcceleration() * delta,
-        Player.MAX_SPEED
-      );
-    } else if (input.isPressed.left) {
-      this.velocity[0] = Math.max(
-        this.velocity[0] - this.currentAcceleration() * delta,
-        this.minSpeed
-      );
-    }
     if (input.isPressed.space && this.onGround) {
       this.velocity[1] = Player.JUMP_VELOCITY * this.gravityMultiplier;
     }
@@ -79,7 +68,7 @@ class Player extends GameObject {
         this.velocity[1] = 0;
       }
     } else {
-      this.velocity[0] = 0;
+      this.game.gameOver();
     }
   }
 }
