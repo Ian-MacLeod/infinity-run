@@ -10,6 +10,11 @@ h1 {
   margin-bottom: 35px;
 }
 
+h2 {
+  font-size: 40px;
+  margin-bottom: 15px;
+}
+
 a {
   text-decoration: none;
   font-size: 18px;
@@ -21,30 +26,11 @@ a:hover {
   text-decoration: underline;
 }
 
-footer {
-  position: relative;
-  width: 1000px;
-  margin: 25px auto;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.sound-toggle {
-  position: absolute;
-  z-index: 1;
-  top: 10px;
-  left: 10px;
-}
-
-.hide {
-  display: none;
-}
-
 .game-holder {
   height: 600px;
   width: 1000px;
   margin: 0 auto;
+  position: relative;
   background-image: url(../img/background/parallax-space-background.png);
   background-size: cover;
   position: relative;
@@ -52,6 +38,25 @@ footer {
   align-items: center;
   justify-content: center;
   box-shadow: 0 0 5px 2px rgba(255, 246, 29, 0.5);
+}
+
+.sound-toggle {
+  position: absolute;
+  z-index: 10;
+  top: 10px;
+  left: 10px;
+  width: 50px;
+  height: 50px;
+  background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCI+PHBhdGggZmlsbD0iI0ZGRjYxRCIgZD0iTTQgOWg0LjAwMkwxMiA1djE0Yy0yLjQ0Ni0yLjY2Ny0zLjc3OC00LTMuOTk4LTRINFY5em0xMCA0YTEgMSAwIDAgMCAwLTJWOWEzIDMgMCAwIDEgMCA2di0yem0wIDRhNSA1IDAgMCAwIDAtMTBWNWE3IDcgMCAwIDEgMCAxNHYtMnoiLz48L3N2Zz4NCg==);
+  background-size: 100% 100%;
+}
+
+.sound-toggle.muted {
+  background-image: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCI+PHBhdGggZmlsbD0iI0ZGRjYxRCIgZD0iTTE4IDEwLjU4NGwtMi4yOTMtMi4yOTEtMS40MTQgMS40MTQgMi4yOTMgMi4yOTEtMi4yOTEgMi4yOTEgMS40MTQgMS40MTUgMi4yOTItMi4yOTIgMi4yOTQgMi4yOTIgMS40MTQtMS40MTUtMi4yOTMtMi4yOTEgMi4yOTEtMi4yOS0xLjQxNC0xLjQxNS0yLjI5MiAyLjI5MXpNNCA5aDQuMDAyTDEyIDV2MTRjLTIuNDQ2LTIuNjY3LTMuNzc4LTQtMy45OTgtNEg0Vjl6Ii8+PC9zdmc+);
+}
+
+.sound-toggle:hover {
+  cursor: pointer;
 }
 
 canvas {
@@ -64,7 +69,7 @@ canvas {
 
 .button {
   border-radius: 10px;
-  padding: 10px;
+  padding: 10px 20px;
   font-size: 20px;
   border: 1px solid rgb(255, 246, 29);
   color: rgb(255, 246, 29);
@@ -79,6 +84,7 @@ canvas {
 .start-game-button {
   position: relative;
   z-index: 1;
+  display: inline-block;
 }
 
 #game-over {
@@ -87,4 +93,53 @@ canvas {
   color: white;
   background: rgba(0, 0, 0, 0.7);
   padding: 20px 40px;
+}
+
+.instructions {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 5;
+  background-image: url(../img/background/parallax-space-background.png);
+  background-size: cover;
+  color: rgb(255, 246, 29);
+}
+
+.instructions .content {
+  width: 550px;
+  margin: 150px auto;
+  font-size: 18px;
+}
+
+.instructions .button {
+  margin-top: 100px;
+}
+
+.key {
+  display: inline-block;
+  padding: 5px 10px;
+  background: #ccc;
+  border-radius: 5px;
+  border-right: 3px solid #666;
+  border-bottom: 3px solid #666;
+  color: #222;
+}
+
+footer {
+  width: 1000px;
+  margin: 20px auto;
+  display: flex;
+  justify-content: space-between;
+  align-content: center;
+}
+
+.bottom-links {
+  display: flex;
+  align-items: center;
+}
+
+.hide {
+  display: none;
 }

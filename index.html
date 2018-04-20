@@ -9,13 +9,23 @@
     <h1>Infinity Run</h1>
     <div class="game-holder">
       <canvas id="game"></canvas>
-      <div class="initial start-game-button button">Start Game</div>
       <div id="game-over" class="hide">
         <h2>Game Over!</h2>
         <p class="result"></p>
-        <div class="start-game-button button">Play Again</div>
+        <div class="start-game-button button hide">Play Again</div>
       </div>
-      <div class="sound-toggle"></div>
+      <div class="sound-toggle muted">
+      </div>
+      <div class="start-game-button button home hide">Start Game</div>
+      <div class="instructions">
+        <div class="content">
+          <h2>How to Play</h2>
+          <p>Press <span class="key">space</span> to jump, press <span class="key">g</span> to reverse gravity.</p>
+          <p>You can only reverse gravity when you are touching solid ground.</p>
+          <p>Try to make it as far as you can!</p>
+          <div class="initial start-game-button button hide">Start Game</div>
+        </div>
+      </div>
     </div>
     <footer>
       <div class="bottom-links">

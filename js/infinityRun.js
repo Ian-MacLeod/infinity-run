@@ -1,6 +1,5 @@
 import Game from "./game";
 import Input from "./input";
-import { GAME_WIDTH, GAME_HEIGHT } from "./constants";
 import { mute, unmute } from "./audio";
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -10,6 +9,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const muteEl = document.querySelector(".sound-toggle");
 
+  mute();
   muteEl.addEventListener("click", () => {
     if (muteEl.classList.contains("muted")) {
       unmute();
@@ -20,12 +20,24 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   const startEls = document.querySelectorAll(".start-game-button");
+  const homeStartEl = document.querySelector(".start-game-button.home");
   const gameOverEl = document.getElementById("game-over");
   const resultEl = document.querySelector("p.result");
+  const instructionsEl = document.querySelector(".instructions");
+  const howToPlayEl = document.querySelector(".how-to-play");
+
+  setTimeout(() => {
+    startEls.forEach(el => el.classList.remove("hide"));
+  }, 1000);
+
+  howToPlayEl.addEventListener("click", () =>
+    instructionsEl.classList.toggle("hide")
+  );
 
   const onStartGame = () => {
-    startEls[0].classList.add("hide");
+    instructionsEl.classList.add("hide");
     gameOverEl.classList.add("hide");
+    homeStartEl.classList.add("hide");
     game.start();
   };
 
