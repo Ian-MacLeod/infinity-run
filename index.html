@@ -3,10 +3,27 @@
   <head>
     <meta charset="utf-8">
     <title>Infinity Run</title>
+    <link rel="stylesheet" type="text/css" href="css/style.css">
   </head>
   <body>
     <h1>Infinity Run</h1>
-    <canvas id="game"></canvas>
+    <div class="game-holder">
+      <canvas id="game"></canvas>
+      <div class="initial start-game-button button">Start Game</div>
+      <div id="game-over" class="hide">
+        <h2>Game Over!</h2>
+        <p class="result"></p>
+        <div class="start-game-button button">Play Again</div>
+      </div>
+      <div class="sound-toggle"></div>
+    </div>
+    <footer>
+      <div class="bottom-links">
+        <a href="https://github.com/Ian-MacLeod">Github</a>
+        <a href="https://www.linkedin.com/in/ian-macleod-6421a2137/">LinkedIn</a>
+      </div>
+      <div class="how-to-play button">How to Play</div>
+    </footer>
     <script src="bundle.js"></script>
   </body>
 </html>

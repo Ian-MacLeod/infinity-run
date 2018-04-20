@@ -1,0 +1,90 @@
+body {
+  text-align: center;
+  font-family: sans-serif;
+  background: #10070d;
+}
+
+h1 {
+  color: rgb(255, 246, 29);
+  font-size: 40px;
+  margin-bottom: 35px;
+}
+
+a {
+  text-decoration: none;
+  font-size: 18px;
+  color: rgb(255, 246, 29);
+  margin-right: 20px;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+footer {
+  position: relative;
+  width: 1000px;
+  margin: 25px auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.sound-toggle {
+  position: absolute;
+  z-index: 1;
+  top: 10px;
+  left: 10px;
+}
+
+.hide {
+  display: none;
+}
+
+.game-holder {
+  height: 600px;
+  width: 1000px;
+  margin: 0 auto;
+  background-image: url(../img/background/parallax-space-background.png);
+  background-size: cover;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 5px 2px rgba(255, 246, 29, 0.5);
+}
+
+canvas {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+
+.button {
+  border-radius: 10px;
+  padding: 10px;
+  font-size: 20px;
+  border: 1px solid rgb(255, 246, 29);
+  color: rgb(255, 246, 29);
+}
+
+.button:hover {
+  cursor: pointer;
+  background: rgb(255, 246, 29);
+  color: #333;
+}
+
+.start-game-button {
+  position: relative;
+  z-index: 1;
+}
+
+#game-over {
+  position: relative;
+  z-index: 1;
+  color: white;
+  background: rgba(0, 0, 0, 0.7);
+  padding: 20px 40px;
+}
