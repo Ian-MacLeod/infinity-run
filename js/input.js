@@ -25,6 +25,7 @@ class Input {
         this.isPressed.left = true;
         break;
       case keyCodes.SPACE:
+        e.preventDefault();
         this.isPressed.space = true;
         break;
       case keyCodes.G:

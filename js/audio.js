@@ -1,4 +1,14 @@
 const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+const gainNode = audioContext.createGain();
+gainNode.connect(audioContext.destination);
+
+export const mute = () => {
+  gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+};
+
+export const unmute = () => {
+  gainNode.gain.setValueAtTime(0.8, audioContext.currentTime);
+};
 
 class Sound {
   constructor(uri) {
@@ -29,7 +39,7 @@ class Sound {
 
     const source = audioContext.createBufferSource();
     source.buffer = this.buffer;
-    source.connect(audioContext.destination);
+    source.connect(gainNode);
     source.start(0);
 
     return source;

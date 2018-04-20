@@ -1,11 +1,23 @@
 import Game from "./game";
 import Input from "./input";
 import { GAME_WIDTH, GAME_HEIGHT } from "./constants";
+import { mute, unmute } from "./audio";
 
 document.addEventListener("DOMContentLoaded", () => {
   const canvasEl = document.getElementById("game");
   canvasEl.width = Game.WIDTH;
   canvasEl.height = Game.HEIGHT;
+
+  const muteEl = document.querySelector(".sound-toggle");
+
+  muteEl.addEventListener("click", () => {
+    if (muteEl.classList.contains("muted")) {
+      unmute();
+    } else {
+      mute();
+    }
+    muteEl.classList.toggle("muted");
+  });
 
   const startEls = document.querySelectorAll(".start-game-button");
   const gameOverEl = document.getElementById("game-over");
