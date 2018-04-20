@@ -1,23 +1,26 @@
 import Terrain from "./terrain";
 import Player from "./player";
 import { spriteLocations, loadSprites } from "./sprites";
+import sounds from "./audio";
 
 class Game {
-  constructor(ctx, input) {
+  constructor(ctx, input, onGameOver) {
     loadSprites(() => {});
     this.ctx = ctx;
     this.input = input;
-    this.distance = 0;
     this.newFrame = this.newFrame.bind(this);
     this.gameOver = this.gameOver.bind(this);
+    this.onGameOver = onGameOver;
   }
 
   start() {
+    this.currentlyPlaying = sounds.background.play();
     this.playing = true;
     this.player = new Player([200, 200], this);
     const terrain = new Terrain([100, 400], 700, 100);
     this.terrainObjects = [terrain];
     this.speed = Game.INITIAL_SPEED;
+    this.distance = 0;
     this.lastTime = 0;
     this.difficulty = 0;
     this.gravity = Game.INITIAL_GRAVITY;
@@ -26,7 +29,6 @@ class Game {
   }
 
   newFrame(time) {
-    this.speed = Game.INITIAL_SPEED + time * Game.ACCELERATION;
     let scaledDelta = 0;
     if (this.lastTime !== 0) {
       scaledDelta = (time - this.lastTime) / 16;
@@ -36,6 +38,7 @@ class Game {
     }
     this.gravity += scaledDelta * Game.GRAVITY_GROWTH_RATE;
     this.distance += scaledDelta * this.speed;
+    this.speed += scaledDelta * Game.ACCELERATION;
     this.lastTime = time;
     this.nextState(scaledDelta);
     this.drawFrame();
@@ -140,15 +143,16 @@ class Game {
   }
 
   gameOver() {
-    alert(`You ran for ${Math.floor(this.distance / 40)} meters.`);
+    this.onGameOver(`You ran for ${Math.floor(this.distance / 40)} meters.`);
     this.playing = false;
+    this.currentlyPlaying.stop();
   }
 }
 
 Game.INITIAL_GRAVITY = 0.6;
 Game.GRAVITY_GROWTH_RATE = 0;
 Game.INITIAL_SPEED = 5;
-Game.ACCELERATION = 1 / 6000;
+Game.ACCELERATION = 1 / 600;
 Game.DIFFICULTY_RATING_GROWTH = 1 / 5000;
 Game.WIDTH = 1000;
 Game.HEIGHT = 600;

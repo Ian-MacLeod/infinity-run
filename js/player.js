@@ -1,6 +1,7 @@
 import { spriteLocations } from "./sprites";
 import GameObject from "./gameObject";
 import { drawFlipped } from "./utils";
+import sounds from "./audio";
 
 class Player extends GameObject {
   constructor(pos, game) {
@@ -36,9 +37,11 @@ class Player extends GameObject {
 
   nextState(input, delta) {
     if (this.onGround && input.isPressed.g) {
+      sounds.gravityReverse.play();
       this.gravityMultiplier *= -1;
     }
     if (input.isPressed.space && this.onGround) {
+      sounds.jump.play();
       this.velocity[1] = Player.JUMP_VELOCITY * this.gravityMultiplier;
     }
     this.velocity[1] += this.game.gravity * this.gravityMultiplier;
