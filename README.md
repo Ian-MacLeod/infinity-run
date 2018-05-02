@@ -1,82 +1,91 @@
-# Infinite Run
+# Infinity Run
 
 ## Overview
 
-Infinite Run is a sidescrolling game where the player is forced to keep moving at a minimum pace that increases over time. There is no win condition - the goal is simply to cover as much distance as possible before hitting an obstacle and dying. While there will be only one level, the difficulty will ramp up as time progresses and force an eventual end to the game.
+Infinity Run is a side-scrolling game where the player is forced to keep moving at a minimum pace that increases over time. There is no win condition - the goal is simply to cover as much distance as possible before hitting an obstacle and dying. While there will be only one level, the difficulty will ramp up as time progresses and force an eventual end to the game.
+
+[Check out the live version here](https://ian-macleod.github.io/infinity-run/)
+
+![Gameplay](https://i.imgur.com/f6JcP1X.gif)
 
 ## Functionality
 
-Infinite run will include the following functionality:
+Infinity Run includes the following functionality:
 
-* [ ] The ability to modulate the speed of the character (as long as it is faster than the minimum and always in a rightward direction)
-* [ ] The ability to jump and duck to avoid obstacles
+* [ ] The ability to jump and reverse gravity to avoid obstacles
 * [ ] A measure of how far the player has traveled in each game, as well as a highest achieved score in the current session
+* [ ] Procedurally generated content which provides a gradual increasing difficulty level while avoiding generating terrain that is impossible to navigate
 * [ ] Sprites
 * [ ] Music and sound effects, which can be muted
 * [ ] A directions modal explaining the point of the game and the control scheme
 
 ## Wireframes
 
-Infinite run will be a single page taken up mostly by a canvas element that will house the actual game.
+Infinity run consists of a single page taken up mostly by a canvas element that houses the actual game.
 
-There will be a button to toggle the sound of the game at the top right of the canvas.
+There is a button to toggle the sound of the game at the top right of the canvas.
 
-Below the canvas on the right hand side there will be buttons pointing to my Github and LinkedIn profiles.
+Below the canvas on the left hand side there are buttons pointing to my Github and LinkedIn profiles.
 
-Also below the canvas, but centered, will be a button that brings up a modal with instructions about how to play and what the control scheme is for the game.
+Also below the canvas, but to the right, is a button that brings up a modal with instructions about how to play and what the control scheme is for the game.
 
 ![Infinity Run Wireframe](https://i.imgur.com/7bCBZaD.png)
 
 ## Architecture
 
-The technologies used for the project will be:
+The technologies used for the project are:
 
 * Vanilla JavaScript for the game logic
-* HTML5 Canvas will be used to render the game
-* Web Audio API will be used for in game music and sound effects
-* Webpack will be used to bundle the scripts and manage dependencies
+* HTML5 Canvas is used to render the game
+* Web Audio API for in game music and sound effects
+* Webpack is used to bundle the scripts and manage dependencies
 
-The logic for the game itself will be divided up as follows:
+The logic for the game itself is divided up as follows:
 
-`game.js` - Keeps track of the overall game state. Holds all of the objects and an instance of GameView, on which it calls render() periodically.
+`game.js` - Keeps track of the overall game state. Holds all of the objects and the context of the canvas, and uses requestAnimationFrame to render its state to the canvas periodically.
 
-`gameView.js` - Determines how each snapshot of game state should be displayed to the player. Holds a reference to the context of the canvas.
+`gameObject.js` - Contains logic for positioning and collision detection that all other game entities inherit from.
 
-`hero.js` - Responsible for the behavior of the player character. Will enforce the minimum running speed and have methods to jump, duck and run faster or slower.
+`player.js` - Responsible for the behavior of the player character. Will enforce the minimum running speed and have methods to jump, and reverse gravity.
 
-`terrain.js` - Contains the terrain class which will represent static (probably rectangular) objects that the player will run on top of.
+`terrain.js` - Contains the terrain class which will represent static objects that the player will run on top of.
 
-`obstacle.js` - Contains objects which are fatal to the player if they come into contact with each other
+`sprites.js` - Loads and holds information about the locations of the sprites for the game.
 
-`audio.js` - Responsible for playing the soundtrack and sound effects for the game
+`audio.js` - Responsible for loading and playing the soundtrack and sound effects for the game.
 
-`world.js` - Will contain information about the specific position of the terrain and obstacles that the player will navigate.
 
-## Implementation Timeline
+## Technical Challenges
 
-Day 1
+One of the challenges in building Infinity Run was generating terrain objects in such a way that they would provide a challenge to the player without creating impossible situations that could lead to frustrating deaths. To address this problem I implemented the following process for creating terrain objects. First, I choose a height for the terrain and whether it would be upside-down relative to the previous one. Next, I calculate the longest jump possible based on the difference between that height and the height of the last terrain. Finally I multiply that distance by a randomized number selected from a range that increases over time, but is always less than 1.
 
-* [ ] Set up the project skeleton, including webpack, an entry .js file, and an index.html file with the canvas element
-* [ ] Make it possible for the player to move and jump while being affected by gravity and walking on terrain objects
+```javascript
+static newTerrain(lastTerrain, speed, difficulty) {
+  const top = Game.HEIGHT - randRange(1, 3) * Terrain.BLOCK_HEIGHT;
+  const maxGap = this.maxJumpableGap(
+    speed,
+    top - lastTerrain.getTop(),
+    Player.JUMP_VELOCITY
+  );
+  const left =
+    lastTerrain.getRight() +
+    randRange((0.2 + difficulty) * maxGap, (0.5 + difficulty) * maxGap);
+  const width = randRange(6, 14) * Terrain.BLOCK_HEIGHT;
 
-Day 2
+  return new Terrain([left, top], width, Terrain.HEIGHT);
+}
 
-* [ ] Implement obstacles, collision detection, and end the game when a player collides with an obstacle or misses a jump over a gap
-* [ ] Include sprites/art for the player, the terrain, and the environment
+static maxJumpableGap(speed, dy, v0) {
+  const g = Player.GRAVITY;
+  const jumpTime = (-v0 + Math.pow(Math.pow(v0, 2) + 2 * g * dy, 0.5)) / g;
+  const gap = jumpTime * speed;
 
-Day 3
+  return gap;
+}
+```
 
-* [ ] Implement music and sound effects
-* [ ] Keep track of distance traveled within each game and a highest achieved distance between games
-* [ ] Enforce a minimum running speed that grows over time
+## Future Directions
 
-Day 4
-
-* [ ] Build the rest of the page surrounding the canvas
-* [ ] Create the actual world that the player will run in, looping it when maximum difficulty in terms of environment is reached.
-* [ ] Polish the feel of the movement, controls, and collision detection
-
-## Bonus Features
-
-* Procedurally generated content
+* Creating more interesting obstacles
 * Adding other movement options for the player
+* Implementing enemies with basic AI
