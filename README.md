@@ -8,29 +8,6 @@ Infinity Run is a side-scrolling game where the player is forced to keep moving 
 
 ![Gameplay](https://i.imgur.com/f6JcP1X.gif)
 
-## Functionality
-
-Infinity Run includes the following functionality:
-
-* [ ] The ability to jump and reverse gravity to avoid obstacles
-* [ ] A measure of how far the player has traveled in each game, as well as a highest achieved score in the current session
-* [ ] Procedurally generated content which provides a gradual increasing difficulty level while avoiding generating terrain that is impossible to navigate
-* [ ] Sprites
-* [ ] Music and sound effects, which can be muted
-* [ ] A directions modal explaining the point of the game and the control scheme
-
-## Wireframes
-
-Infinity run consists of a single page taken up mostly by a canvas element that houses the actual game.
-
-There is a button to toggle the sound of the game at the top right of the canvas.
-
-Below the canvas on the left hand side there are buttons pointing to my Github and LinkedIn profiles.
-
-Also below the canvas, but to the right, is a button that brings up a modal with instructions about how to play and what the control scheme is for the game.
-
-![Infinity Run Wireframe](https://i.imgur.com/7bCBZaD.png)
-
 ## Architecture
 
 The technologies used for the project are:
@@ -55,7 +32,7 @@ The logic for the game itself is divided up as follows:
 `audio.js` - Responsible for loading and playing the soundtrack and sound effects for the game.
 
 
-## Technical Challenges
+## Sample Code
 
 One of the challenges in building Infinity Run was generating terrain objects in such a way that they would provide a challenge to the player without creating impossible situations that could lead to frustrating deaths. To address this problem I implemented the following process for creating terrain objects. First, I choose a height for the terrain and whether it would be upside-down relative to the previous one. Next, I calculate the longest jump possible based on the difference between that height and the height of the last terrain. Finally I multiply that distance by a randomized number selected from a range that increases over time, but is always less than 1.
 
