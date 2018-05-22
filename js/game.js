@@ -1,20 +1,20 @@
 import Terrain from "./terrain";
 import Player from "./player";
 import { spriteLocations, loadSprites } from "./sprites";
-import sounds from "./audio";
 
 class Game {
-  constructor(ctx, input, onGameOver) {
+  constructor(ctx, input, onGameOver, sounds) {
     loadSprites(() => {});
     this.ctx = ctx;
     this.input = input;
     this.newFrame = this.newFrame.bind(this);
     this.gameOver = this.gameOver.bind(this);
     this.onGameOver = onGameOver;
+    this.sounds = sounds;
   }
 
   start() {
-    this.currentlyPlaying = sounds.background.play();
+    this.currentlyPlaying = this.sounds.background.play();
     this.playing = true;
     this.player = new Player([200, 200], this);
     const terrain = new Terrain([100, 400], 700, 100);

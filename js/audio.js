@@ -12,26 +12,28 @@ export const unmute = () => {
 
 class Sound {
   constructor(uri) {
-    this.loadAudio(uri);
+    this.promise = this.loadAudio(uri);
     this.buffer = null;
   }
 
   loadAudio(uri) {
-    const request = new XMLHttpRequest();
-    request.open("GET", uri, true);
-    request.responseType = "arraybuffer";
-    request.onload = () => {
-      audioContext.decodeAudioData(
-        request.response,
-        buffer => {
-          this.buffer = buffer;
-        },
-        e => {
-          console.log("Audio error! ", e);
-        }
-      );
-    };
-    request.send();
+    return new Promise((resolve, reject) => {
+      const request = new XMLHttpRequest();
+      request.open("GET", uri, true);
+      request.responseType = "arraybuffer";
+      request.onload = () => {
+        audioContext.decodeAudioData(
+          request.response,
+          buffer => {
+            this.buffer = buffer;
+            resolve();
+          },
+          reject
+        );
+      };
+      request.onerror = reject;
+      request.send();
+    })
   }
 
   play() {

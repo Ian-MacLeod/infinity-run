@@ -1,6 +1,6 @@
 import Game from "./game";
 import Input from "./input";
-import { mute, unmute } from "./audio";
+import sounds, { mute, unmute } from "./audio";
 
 document.addEventListener("DOMContentLoaded", () => {
   const canvasEl = document.getElementById("game");
@@ -26,9 +26,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const instructionsEl = document.querySelector(".instructions");
   const howToPlayEl = document.querySelector(".how-to-play");
 
-  setTimeout(() => {
+  Promise.all(Object.values(sounds).map(sound => sound.promise)).then(() => {
     startEls.forEach(el => el.classList.remove("hide"));
-  }, 1000);
+  });
 
   howToPlayEl.addEventListener("click", () =>
     instructionsEl.classList.toggle("hide")
@@ -48,7 +48,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const ctx = canvasEl.getContext("2d");
   const input = new Input();
-  const game = new Game(ctx, input, onGameEnd);
+  const game = new Game(ctx, input, onGameEnd, sounds);
 
   startEls.forEach(el => el.addEventListener("click", onStartGame));
   startEls[0].addEventListener("click", onStartGame);

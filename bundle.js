@@ -60,642 +60,11 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 0);
+/******/ 	return __webpack_require__(__webpack_require__.s = 6);
 /******/ })
 /************************************************************************/
 /******/ ([
 /* 0 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var _game = __webpack_require__(1);
-
-var _game2 = _interopRequireDefault(_game);
-
-var _input = __webpack_require__(6);
-
-var _input2 = _interopRequireDefault(_input);
-
-var _audio = __webpack_require__(11);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-document.addEventListener("DOMContentLoaded", function () {
-  var canvasEl = document.getElementById("game");
-  canvasEl.width = _game2.default.WIDTH;
-  canvasEl.height = _game2.default.HEIGHT;
-
-  var muteEl = document.querySelector(".sound-toggle");
-
-  (0, _audio.mute)();
-  muteEl.addEventListener("click", function () {
-    if (muteEl.classList.contains("muted")) {
-      (0, _audio.unmute)();
-    } else {
-      (0, _audio.mute)();
-    }
-    muteEl.classList.toggle("muted");
-  });
-
-  var startEls = document.querySelectorAll(".start-game-button");
-  var homeStartEl = document.querySelector(".start-game-button.home");
-  var gameOverEl = document.getElementById("game-over");
-  var resultEl = document.querySelector("p.result");
-  var instructionsEl = document.querySelector(".instructions");
-  var howToPlayEl = document.querySelector(".how-to-play");
-
-  setTimeout(function () {
-    startEls.forEach(function (el) {
-      return el.classList.remove("hide");
-    });
-  }, 1000);
-
-  howToPlayEl.addEventListener("click", function () {
-    return instructionsEl.classList.toggle("hide");
-  });
-
-  var onStartGame = function onStartGame() {
-    instructionsEl.classList.add("hide");
-    gameOverEl.classList.add("hide");
-    homeStartEl.classList.add("hide");
-    game.start();
-  };
-
-  var onGameEnd = function onGameEnd(result) {
-    gameOverEl.classList.remove("hide");
-    resultEl.textContent = result;
-  };
-
-  var ctx = canvasEl.getContext("2d");
-  var input = new _input2.default();
-  var game = new _game2.default(ctx, input, onGameEnd);
-
-  startEls.forEach(function (el) {
-    return el.addEventListener("click", onStartGame);
-  });
-  startEls[0].addEventListener("click", onStartGame);
-});
-
-/***/ }),
-/* 1 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _terrain = __webpack_require__(3);
-
-var _terrain2 = _interopRequireDefault(_terrain);
-
-var _player = __webpack_require__(4);
-
-var _player2 = _interopRequireDefault(_player);
-
-var _sprites = __webpack_require__(9);
-
-var _audio = __webpack_require__(11);
-
-var _audio2 = _interopRequireDefault(_audio);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var Game = function () {
-  function Game(ctx, input, onGameOver) {
-    _classCallCheck(this, Game);
-
-    (0, _sprites.loadSprites)(function () {});
-    this.ctx = ctx;
-    this.input = input;
-    this.newFrame = this.newFrame.bind(this);
-    this.gameOver = this.gameOver.bind(this);
-    this.onGameOver = onGameOver;
-  }
-
-  _createClass(Game, [{
-    key: "start",
-    value: function start() {
-      this.currentlyPlaying = _audio2.default.background.play();
-      this.playing = true;
-      this.player = new _player2.default([200, 200], this);
-      var terrain = new _terrain2.default([100, 400], 700, 100);
-      this.terrainObjects = [terrain];
-      this.speed = Game.INITIAL_SPEED;
-      this.distance = 0;
-      this.lastTime = 0;
-      this.difficulty = 0;
-      this.gravity = Game.INITIAL_GRAVITY;
-      this.input.attachHandlers();
-      requestAnimationFrame(this.newFrame);
-    }
-  }, {
-    key: "newFrame",
-    value: function newFrame(time) {
-      var scaledDelta = 0;
-      if (this.lastTime !== 0) {
-        scaledDelta = (time - this.lastTime) / 16;
-      }
-      if (this.difficulty < 0.4) {
-        this.difficulty += scaledDelta * Game.DIFFICULTY_RATING_GROWTH;
-      }
-      this.gravity += scaledDelta * Game.GRAVITY_GROWTH_RATE;
-      this.distance += scaledDelta * this.speed;
-      this.speed += scaledDelta * Game.ACCELERATION;
-      this.lastTime = time;
-      this.nextState(scaledDelta);
-      this.drawFrame();
-      if (this.playing) {
-        requestAnimationFrame(this.newFrame);
-      }
-    }
-  }, {
-    key: "nextState",
-    value: function nextState(delta) {
-      this.updateTerrainState(delta);
-      this.updatePlayerState(delta);
-      this.destroyOldObjects();
-      this.createNewObjects();
-    }
-  }, {
-    key: "updateTerrainState",
-    value: function updateTerrainState(delta) {
-      var _this = this;
-
-      this.terrainObjects.forEach(function (obj) {
-        return obj.nextState(_this.speed, delta);
-      });
-    }
-  }, {
-    key: "updatePlayerState",
-    value: function updatePlayerState(delta) {
-      this.player.nextState(this.input, delta);
-      this.player.boundBy(this.terrainObjects);
-      if (this.player.pos[1] > Game.HEIGHT || this.player.pos[1] < 0) {
-        this.gameOver();
-      }
-    }
-  }, {
-    key: "drawFrame",
-    value: function drawFrame() {
-      var _this2 = this;
-
-      this.drawBackground();
-      this.terrainObjects.forEach(function (obj) {
-        return obj.draw(_this2.ctx);
-      });
-      this.player.draw(this.ctx, this.distance);
-    }
-  }, {
-    key: "drawBackground",
-    value: function drawBackground() {
-      this.ctx.drawImage(_sprites.spriteLocations.background.imageEl, 0, 0, Game.WIDTH, Game.HEIGHT);
-      var start = -(this.distance / 80 % Game.WIDTH);
-      this.ctx.drawImage(_sprites.spriteLocations.backgroundStars.imageEl, start, 0, Game.WIDTH, Game.HEIGHT);
-      this.ctx.drawImage(_sprites.spriteLocations.backgroundStars.imageEl, start + Game.WIDTH, 0, Game.WIDTH, Game.HEIGHT);
-      start = -(this.distance / 40 % (Game.WIDTH + 700));
-      this.ctx.drawImage(_sprites.spriteLocations.backgroundFarPlanets.imageEl, start, 0, Game.WIDTH, Game.HEIGHT);
-      this.ctx.drawImage(_sprites.spriteLocations.backgroundFarPlanets.imageEl, start + Game.WIDTH + 700, 0, Game.WIDTH, Game.HEIGHT);
-      start = -(this.distance / 25 % (Game.WIDTH + 300));
-      this.ctx.drawImage(_sprites.spriteLocations.backgroundRingPlanet.imageEl, start, 200, 153, 345);
-      this.ctx.drawImage(_sprites.spriteLocations.backgroundRingPlanet.imageEl, start + Game.WIDTH + 300, 200, 153, 345);
-    }
-  }, {
-    key: "destroyOldObjects",
-    value: function destroyOldObjects() {
-      if (this.terrainObjects[0].getRight() < 0) {
-        this.terrainObjects.splice(0, 1);
-      }
-    }
-  }, {
-    key: "createNewObjects",
-    value: function createNewObjects() {
-      var lastTerrain = this.terrainObjects[this.terrainObjects.length - 1];
-      if (lastTerrain.getRight() < Game.WIDTH) {
-        this.terrainObjects.push(_terrain2.default.fromLastTerrain(lastTerrain, this.speed, this.difficulty));
-      }
-    }
-  }, {
-    key: "gameOver",
-    value: function gameOver() {
-      this.onGameOver("You ran for " + Math.floor(this.distance / 40) + " meters.");
-      this.playing = false;
-      this.currentlyPlaying.stop();
-    }
-  }]);
-
-  return Game;
-}();
-
-Game.INITIAL_GRAVITY = 0.6;
-Game.GRAVITY_GROWTH_RATE = 0;
-Game.INITIAL_SPEED = 5;
-Game.ACCELERATION = 1 / 600;
-Game.DIFFICULTY_RATING_GROWTH = 1 / 5000;
-Game.WIDTH = 1000;
-Game.HEIGHT = 600;
-
-exports.default = Game;
-
-/***/ }),
-/* 2 */,
-/* 3 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _utils = __webpack_require__(8);
-
-var _sprites = __webpack_require__(9);
-
-var _gameObject = __webpack_require__(10);
-
-var _gameObject2 = _interopRequireDefault(_gameObject);
-
-var _game = __webpack_require__(1);
-
-var _game2 = _interopRequireDefault(_game);
-
-var _player = __webpack_require__(4);
-
-var _player2 = _interopRequireDefault(_player);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-var Terrain = function (_GameObject) {
-  _inherits(Terrain, _GameObject);
-
-  function Terrain(pos, width, height) {
-    _classCallCheck(this, Terrain);
-
-    var _this = _possibleConstructorReturn(this, (Terrain.__proto__ || Object.getPrototypeOf(Terrain)).call(this, pos, width, height));
-
-    _this.sprites = _sprites.spriteLocations.environment;
-    return _this;
-  }
-
-  _createClass(Terrain, [{
-    key: "flipped",
-    value: function flipped() {
-      return new Terrain([this.pos[0], _game2.default.HEIGHT - (this.pos[1] + this.height)], this.width, this.height);
-    }
-  }, {
-    key: "isTop",
-    value: function isTop() {
-      return this.pos[1] <= 0;
-    }
-  }, {
-    key: "draw",
-    value: function draw(ctx) {
-      ctx.fillStyle = "#756";
-      for (var col = 0; col < this.getBlockWidth(); col++) {
-        for (var row = 0; row < this.getBlockHeight(); row++) {
-          var tile = "stoneCenter";
-          if (row === 0) {
-            tile = "stoneMid";
-          }
-          if (row >= this.getBlockHeight() - 1) {
-            tile = "stoneMid";
-            _utils.drawFlipped.apply(undefined, [ctx, this.sprites.imageEl].concat(_toConsumableArray(this.sprites.locations[tile]), [Math.floor(this.pos[0] + col * Terrain.BLOCK_WIDTH), this.pos[1] + row * Terrain.BLOCK_HEIGHT, Terrain.BLOCK_WIDTH, Terrain.BLOCK_HEIGHT]));
-          } else {
-            ctx.drawImage.apply(ctx, [this.sprites.imageEl].concat(_toConsumableArray(this.sprites.locations[tile]), [Math.floor(this.pos[0] + col * Terrain.BLOCK_WIDTH), this.pos[1] + row * Terrain.BLOCK_HEIGHT, Terrain.BLOCK_WIDTH, Terrain.BLOCK_HEIGHT]));
-          }
-        }
-      }
-    }
-  }, {
-    key: "getBlockHeight",
-    value: function getBlockHeight() {
-      return this.height / Terrain.BLOCK_HEIGHT;
-    }
-  }, {
-    key: "getBlockWidth",
-    value: function getBlockWidth() {
-      return this.width / Terrain.BLOCK_WIDTH;
-    }
-  }, {
-    key: "nextState",
-    value: function nextState(playerSpeed, delta) {
-      this.pos[0] -= playerSpeed * delta;
-    }
-  }], [{
-    key: "fromLastTerrain",
-    value: function fromLastTerrain(lastTerrain, speed, difficulty) {
-      var shouldFlip = false;
-      if (lastTerrain.isTop()) {
-        lastTerrain = lastTerrain.flipped();
-        shouldFlip = true;
-      }
-
-      var newTerrain = void 0;
-      if ((0, _utils.randRange)(0, 2) === 0) {
-        newTerrain = this.newFlippedTerrain(lastTerrain, speed, difficulty);
-      } else {
-        newTerrain = this.newTerrain(lastTerrain, speed, difficulty);
-      }
-
-      if (shouldFlip) {
-        newTerrain = newTerrain.flipped();
-      }
-      return newTerrain;
-    }
-  }, {
-    key: "newFlippedTerrain",
-    value: function newFlippedTerrain(lastTerrain, speed, difficulty) {
-      var bottom = (0, _utils.randRange)(1, 3) * Terrain.BLOCK_HEIGHT;
-      var maxGap = this.maxJumpableGap(speed, lastTerrain.getTop() - bottom, 0);
-      var left = lastTerrain.getRight() + (0, _utils.randRange)((-0.2 + difficulty * 1.7) * maxGap, (0.2 + difficulty * 1.7) * maxGap);
-      var width = (0, _utils.randRange)(4, 15) * Terrain.BLOCK_HEIGHT;
-
-      return new Terrain([left, bottom - Terrain.HEIGHT], width, Terrain.HEIGHT);
-    }
-  }, {
-    key: "newTerrain",
-    value: function newTerrain(lastTerrain, speed, difficulty) {
-      var top = _game2.default.HEIGHT - (0, _utils.randRange)(1, 3) * Terrain.BLOCK_HEIGHT;
-      var maxGap = this.maxJumpableGap(speed, top - lastTerrain.getTop(), _player2.default.JUMP_VELOCITY);
-      var left = lastTerrain.getRight() + (0, _utils.randRange)((0.2 + difficulty) * maxGap, (0.5 + difficulty) * maxGap);
-      var width = (0, _utils.randRange)(6, 14) * Terrain.BLOCK_HEIGHT;
-
-      return new Terrain([left, top], width, Terrain.HEIGHT);
-    }
-  }, {
-    key: "maxJumpableGap",
-    value: function maxJumpableGap(speed, dy, v0) {
-      var g = _player2.default.GRAVITY;
-      var jumpTime = (-v0 + Math.pow(Math.pow(v0, 2) + 2 * g * dy, 0.5)) / g;
-      var gap = jumpTime * speed;
-
-      return gap;
-    }
-  }]);
-
-  return Terrain;
-}(_gameObject2.default);
-
-Terrain.BLOCK_HEIGHT = 70;
-Terrain.BLOCK_WIDTH = 70;
-Terrain.HEIGHT = 4 * Terrain.BLOCK_HEIGHT;
-
-exports.default = Terrain;
-
-/***/ }),
-/* 4 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _sprites = __webpack_require__(9);
-
-var _gameObject = __webpack_require__(10);
-
-var _gameObject2 = _interopRequireDefault(_gameObject);
-
-var _utils = __webpack_require__(8);
-
-var _audio = __webpack_require__(11);
-
-var _audio2 = _interopRequireDefault(_audio);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-var Player = function (_GameObject) {
-  _inherits(Player, _GameObject);
-
-  function Player(pos, game) {
-    _classCallCheck(this, Player);
-
-    var _this = _possibleConstructorReturn(this, (Player.__proto__ || Object.getPrototypeOf(Player)).call(this, pos, Player.WIDTH, Player.HEIGHT));
-
-    _this.game = game;
-    _this.sprites = _sprites.spriteLocations.player;
-    _this.velocity = [0, 0];
-    _this.onGround = false;
-    _this.gravityMultiplier = 1;
-    return _this;
-  }
-
-  _createClass(Player, [{
-    key: "getSpeed",
-    value: function getSpeed() {
-      return this.velocity[0];
-    }
-  }, {
-    key: "draw",
-    value: function draw(ctx, distance) {
-      var drawArgs = [this.sprites.imageEl].concat(_toConsumableArray(this.sprites.locations.run[Math.floor(distance / 10) % this.sprites.locations.run.length]), [this.pos[0], this.pos[1], Player.WIDTH, Player.HEIGHT]);
-      if (this.gravityMultiplier < 0) {
-        _utils.drawFlipped.apply(undefined, [ctx].concat(_toConsumableArray(drawArgs), [true]));
-      } else {
-        ctx.drawImage.apply(ctx, _toConsumableArray(drawArgs));
-      }
-    }
-  }, {
-    key: "nextState",
-    value: function nextState(input, delta) {
-      if (this.onGround && input.isPressed.g) {
-        _audio2.default.gravityReverse.play();
-        this.gravityMultiplier *= -1;
-      }
-      if (input.isPressed.space && this.onGround) {
-        _audio2.default.jump.play();
-        this.velocity[1] = Player.JUMP_VELOCITY * this.gravityMultiplier;
-      }
-      this.velocity[1] += this.game.gravity * this.gravityMultiplier;
-      this.pos[1] += this.velocity[1];
-    }
-  }, {
-    key: "currentAcceleration",
-    value: function currentAcceleration() {
-      return this.onGround ? Player.ACCELERATION : Player.DIRECTIONAL_INFLUENCE;
-    }
-  }, {
-    key: "boundBy",
-    value: function boundBy(terrainObjects) {
-      var _this2 = this;
-
-      this.onGround = false;
-      terrainObjects.forEach(function (terrain) {
-        var collision = _this2.collision(terrain);
-        if (collision[0] !== 0 && collision[1] !== 0) {
-          _this2.hitTerrain(collision);
-        }
-      });
-    }
-  }, {
-    key: "hitTerrain",
-    value: function hitTerrain(collision) {
-      if (Math.abs(collision[0]) > Math.abs(collision[1]) - 10 || collision[0] > 0) {
-        this.pos[1] += collision[1];
-        if (collision[1] < 0 !== this.gravityMultiplier < 0) {
-          this.onGround = true;
-          this.velocity[1] = 0;
-        }
-      } else {
-        this.game.gameOver();
-      }
-    }
-  }]);
-
-  return Player;
-}(_gameObject2.default);
-
-Player.WIDTH = 36;
-Player.HEIGHT = 48;
-Player.MAX_SPEED = 10;
-Player.ACCELERATION = 2;
-Player.DIRECTIONAL_INFLUENCE = 0.5;
-Player.JUMP_VELOCITY = -15;
-Player.GRAVITY = 0.6;
-
-exports.default = Player;
-
-/***/ }),
-/* 5 */,
-/* 6 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _keyCodes = __webpack_require__(7);
-
-var keyCodes = _interopRequireWildcard(_keyCodes);
-
-function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var Input = function () {
-  function Input() {
-    _classCallCheck(this, Input);
-
-    this.keyDownHandler = this.keyDownHandler.bind(this);
-    this.keyUpHandler = this.keyUpHandler.bind(this);
-    this.isPressed = {
-      right: false,
-      left: false,
-      space: false
-    };
-  }
-
-  _createClass(Input, [{
-    key: "attachHandlers",
-    value: function attachHandlers() {
-      document.addEventListener("keydown", this.keyDownHandler, false);
-      document.addEventListener("keyup", this.keyUpHandler, false);
-    }
-  }, {
-    key: "keyDownHandler",
-    value: function keyDownHandler(e) {
-      switch (e.keyCode) {
-        case keyCodes.RIGHT:
-          this.isPressed.right = true;
-          break;
-        case keyCodes.LEFT:
-          this.isPressed.left = true;
-          break;
-        case keyCodes.SPACE:
-          e.preventDefault();
-          this.isPressed.space = true;
-          break;
-        case keyCodes.G:
-          this.isPressed.g = true;
-          break;
-      }
-    }
-  }, {
-    key: "keyUpHandler",
-    value: function keyUpHandler(e) {
-      switch (e.keyCode) {
-        case keyCodes.RIGHT:
-          this.isPressed.right = false;
-          break;
-        case keyCodes.LEFT:
-          this.isPressed.left = false;
-          break;
-        case keyCodes.SPACE:
-          this.isPressed.space = false;
-          break;
-        case keyCodes.G:
-          this.isPressed.g = false;
-          break;
-      }
-    }
-  }, {
-    key: "removeHandlers",
-    value: function removeHandlers() {
-      document.removeEventListener("keydown", this.keyDownHandler);
-      document.removeEventListener("keyup", this.keyUpHandler);
-    }
-  }]);
-
-  return Input;
-}();
-
-exports.default = Input;
-
-/***/ }),
-/* 7 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-var RIGHT = exports.RIGHT = 39;
-var LEFT = exports.LEFT = 37;
-var SPACE = exports.SPACE = 32;
-var G = exports.G = 71;
-
-/***/ }),
-/* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -734,7 +103,7 @@ var drawFlipped = exports.drawFlipped = function drawFlipped(ctx, image, sX, sY,
 };
 
 /***/ }),
-/* 9 */
+/* 1 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -981,7 +350,7 @@ var spriteLocations = exports.spriteLocations = {
 };
 
 /***/ }),
-/* 10 */
+/* 2 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -993,7 +362,250 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _utils = __webpack_require__(8);
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var audioContext = new (window.AudioContext || window.webkitAudioContext)();
+var gainNode = audioContext.createGain();
+gainNode.connect(audioContext.destination);
+
+var mute = exports.mute = function mute() {
+  gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+};
+
+var unmute = exports.unmute = function unmute() {
+  gainNode.gain.setValueAtTime(0.8, audioContext.currentTime);
+};
+
+var Sound = function () {
+  function Sound(uri) {
+    _classCallCheck(this, Sound);
+
+    this.promise = this.loadAudio(uri);
+    this.buffer = null;
+  }
+
+  _createClass(Sound, [{
+    key: "loadAudio",
+    value: function loadAudio(uri) {
+      var _this = this;
+
+      return new Promise(function (resolve, reject) {
+        var request = new XMLHttpRequest();
+        request.open("GET", uri, true);
+        request.responseType = "arraybuffer";
+        request.onload = function () {
+          audioContext.decodeAudioData(request.response, function (buffer) {
+            _this.buffer = buffer;
+            resolve();
+          }, reject);
+        };
+        request.onerror = reject;
+        request.send();
+      });
+    }
+  }, {
+    key: "play",
+    value: function play() {
+      if (this.buffer === null) return;
+
+      var source = audioContext.createBufferSource();
+      source.buffer = this.buffer;
+      source.connect(gainNode);
+      source.start(0);
+
+      return source;
+    }
+  }]);
+
+  return Sound;
+}();
+
+var sounds = {
+  background: new Sound("audio/background.mp3"),
+  jump: new Sound("audio/jump.mp3"),
+  gravityReverse: new Sound("audio/gravity-reverse.mp3")
+};
+
+exports.default = sounds;
+
+/***/ }),
+/* 3 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _terrain = __webpack_require__(7);
+
+var _terrain2 = _interopRequireDefault(_terrain);
+
+var _player = __webpack_require__(5);
+
+var _player2 = _interopRequireDefault(_player);
+
+var _sprites = __webpack_require__(1);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Game = function () {
+  function Game(ctx, input, onGameOver, sounds) {
+    _classCallCheck(this, Game);
+
+    (0, _sprites.loadSprites)(function () {});
+    this.ctx = ctx;
+    this.input = input;
+    this.newFrame = this.newFrame.bind(this);
+    this.gameOver = this.gameOver.bind(this);
+    this.onGameOver = onGameOver;
+    this.sounds = sounds;
+  }
+
+  _createClass(Game, [{
+    key: "start",
+    value: function start() {
+      this.currentlyPlaying = this.sounds.background.play();
+      this.playing = true;
+      this.player = new _player2.default([200, 200], this);
+      var terrain = new _terrain2.default([100, 400], 700, 100);
+      this.terrainObjects = [terrain];
+      this.speed = Game.INITIAL_SPEED;
+      this.distance = 0;
+      this.lastTime = 0;
+      this.difficulty = 0;
+      this.gravity = Game.INITIAL_GRAVITY;
+      this.input.attachHandlers();
+      requestAnimationFrame(this.newFrame);
+    }
+  }, {
+    key: "newFrame",
+    value: function newFrame(time) {
+      var scaledDelta = 0;
+      if (this.lastTime !== 0) {
+        scaledDelta = (time - this.lastTime) / 16;
+      }
+      if (this.difficulty < 0.4) {
+        this.difficulty += scaledDelta * Game.DIFFICULTY_RATING_GROWTH;
+      }
+      this.gravity += scaledDelta * Game.GRAVITY_GROWTH_RATE;
+      this.distance += scaledDelta * this.speed;
+      this.speed += scaledDelta * Game.ACCELERATION;
+      this.lastTime = time;
+      this.nextState(scaledDelta);
+      this.drawFrame();
+      if (this.playing) {
+        requestAnimationFrame(this.newFrame);
+      }
+    }
+  }, {
+    key: "nextState",
+    value: function nextState(delta) {
+      this.updateTerrainState(delta);
+      this.updatePlayerState(delta);
+      this.destroyOldObjects();
+      this.createNewObjects();
+    }
+  }, {
+    key: "updateTerrainState",
+    value: function updateTerrainState(delta) {
+      var _this = this;
+
+      this.terrainObjects.forEach(function (obj) {
+        return obj.nextState(_this.speed, delta);
+      });
+    }
+  }, {
+    key: "updatePlayerState",
+    value: function updatePlayerState(delta) {
+      this.player.nextState(this.input, delta);
+      this.player.boundBy(this.terrainObjects);
+      if (this.player.pos[1] > Game.HEIGHT || this.player.pos[1] < 0) {
+        this.gameOver();
+      }
+    }
+  }, {
+    key: "drawFrame",
+    value: function drawFrame() {
+      var _this2 = this;
+
+      this.drawBackground();
+      this.terrainObjects.forEach(function (obj) {
+        return obj.draw(_this2.ctx);
+      });
+      this.player.draw(this.ctx, this.distance);
+    }
+  }, {
+    key: "drawBackground",
+    value: function drawBackground() {
+      this.ctx.drawImage(_sprites.spriteLocations.background.imageEl, 0, 0, Game.WIDTH, Game.HEIGHT);
+      var start = -(this.distance / 80 % Game.WIDTH);
+      this.ctx.drawImage(_sprites.spriteLocations.backgroundStars.imageEl, start, 0, Game.WIDTH, Game.HEIGHT);
+      this.ctx.drawImage(_sprites.spriteLocations.backgroundStars.imageEl, start + Game.WIDTH, 0, Game.WIDTH, Game.HEIGHT);
+      start = -(this.distance / 40 % (Game.WIDTH + 700));
+      this.ctx.drawImage(_sprites.spriteLocations.backgroundFarPlanets.imageEl, start, 0, Game.WIDTH, Game.HEIGHT);
+      this.ctx.drawImage(_sprites.spriteLocations.backgroundFarPlanets.imageEl, start + Game.WIDTH + 700, 0, Game.WIDTH, Game.HEIGHT);
+      start = -(this.distance / 25 % (Game.WIDTH + 300));
+      this.ctx.drawImage(_sprites.spriteLocations.backgroundRingPlanet.imageEl, start, 200, 153, 345);
+      this.ctx.drawImage(_sprites.spriteLocations.backgroundRingPlanet.imageEl, start + Game.WIDTH + 300, 200, 153, 345);
+    }
+  }, {
+    key: "destroyOldObjects",
+    value: function destroyOldObjects() {
+      if (this.terrainObjects[0].getRight() < 0) {
+        this.terrainObjects.splice(0, 1);
+      }
+    }
+  }, {
+    key: "createNewObjects",
+    value: function createNewObjects() {
+      var lastTerrain = this.terrainObjects[this.terrainObjects.length - 1];
+      if (lastTerrain.getRight() < Game.WIDTH) {
+        this.terrainObjects.push(_terrain2.default.fromLastTerrain(lastTerrain, this.speed, this.difficulty));
+      }
+    }
+  }, {
+    key: "gameOver",
+    value: function gameOver() {
+      this.onGameOver("You ran for " + Math.floor(this.distance / 40) + " meters.");
+      this.playing = false;
+      this.currentlyPlaying.stop();
+    }
+  }]);
+
+  return Game;
+}();
+
+Game.INITIAL_GRAVITY = 0.6;
+Game.GRAVITY_GROWTH_RATE = 0;
+Game.INITIAL_SPEED = 5;
+Game.ACCELERATION = 1 / 600;
+Game.DIFFICULTY_RATING_GROWTH = 1 / 5000;
+Game.WIDTH = 1000;
+Game.HEIGHT = 600;
+
+exports.default = Game;
+
+/***/ }),
+/* 4 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _utils = __webpack_require__(0);
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -1053,7 +665,7 @@ var GameObject = function () {
 exports.default = GameObject;
 
 /***/ }),
-/* 11 */
+/* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1065,69 +677,458 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+var _sprites = __webpack_require__(1);
+
+var _gameObject = __webpack_require__(4);
+
+var _gameObject2 = _interopRequireDefault(_gameObject);
+
+var _utils = __webpack_require__(0);
+
+var _audio = __webpack_require__(2);
+
+var _audio2 = _interopRequireDefault(_audio);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var audioContext = new (window.AudioContext || window.webkitAudioContext)();
-var gainNode = audioContext.createGain();
-gainNode.connect(audioContext.destination);
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
-var mute = exports.mute = function mute() {
-  gainNode.gain.setValueAtTime(0, audioContext.currentTime);
-};
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var unmute = exports.unmute = function unmute() {
-  gainNode.gain.setValueAtTime(0.8, audioContext.currentTime);
-};
+var Player = function (_GameObject) {
+  _inherits(Player, _GameObject);
 
-var Sound = function () {
-  function Sound(uri) {
-    _classCallCheck(this, Sound);
+  function Player(pos, game) {
+    _classCallCheck(this, Player);
 
-    this.loadAudio(uri);
-    this.buffer = null;
+    var _this = _possibleConstructorReturn(this, (Player.__proto__ || Object.getPrototypeOf(Player)).call(this, pos, Player.WIDTH, Player.HEIGHT));
+
+    _this.game = game;
+    _this.sprites = _sprites.spriteLocations.player;
+    _this.velocity = [0, 0];
+    _this.onGround = false;
+    _this.gravityMultiplier = 1;
+    return _this;
   }
 
-  _createClass(Sound, [{
-    key: "loadAudio",
-    value: function loadAudio(uri) {
-      var _this = this;
-
-      var request = new XMLHttpRequest();
-      request.open("GET", uri, true);
-      request.responseType = "arraybuffer";
-      request.onload = function () {
-        audioContext.decodeAudioData(request.response, function (buffer) {
-          _this.buffer = buffer;
-        }, function (e) {
-          console.log("Audio error! ", e);
-        });
-      };
-      request.send();
+  _createClass(Player, [{
+    key: "getSpeed",
+    value: function getSpeed() {
+      return this.velocity[0];
     }
   }, {
-    key: "play",
-    value: function play() {
-      if (this.buffer === null) return;
+    key: "draw",
+    value: function draw(ctx, distance) {
+      var drawArgs = [this.sprites.imageEl].concat(_toConsumableArray(this.sprites.locations.run[Math.floor(distance / 10) % this.sprites.locations.run.length]), [this.pos[0], this.pos[1], Player.WIDTH, Player.HEIGHT]);
+      if (this.gravityMultiplier < 0) {
+        _utils.drawFlipped.apply(undefined, [ctx].concat(_toConsumableArray(drawArgs), [true]));
+      } else {
+        ctx.drawImage.apply(ctx, _toConsumableArray(drawArgs));
+      }
+    }
+  }, {
+    key: "nextState",
+    value: function nextState(input, delta) {
+      if (this.onGround && input.isPressed.g) {
+        _audio2.default.gravityReverse.play();
+        this.gravityMultiplier *= -1;
+      }
+      if (input.isPressed.space && this.onGround) {
+        _audio2.default.jump.play();
+        this.velocity[1] = Player.JUMP_VELOCITY * this.gravityMultiplier;
+      }
+      this.velocity[1] += this.game.gravity * this.gravityMultiplier;
+      this.pos[1] += this.velocity[1];
+    }
+  }, {
+    key: "currentAcceleration",
+    value: function currentAcceleration() {
+      return this.onGround ? Player.ACCELERATION : Player.DIRECTIONAL_INFLUENCE;
+    }
+  }, {
+    key: "boundBy",
+    value: function boundBy(terrainObjects) {
+      var _this2 = this;
 
-      var source = audioContext.createBufferSource();
-      source.buffer = this.buffer;
-      source.connect(gainNode);
-      source.start(0);
-
-      return source;
+      this.onGround = false;
+      terrainObjects.forEach(function (terrain) {
+        var collision = _this2.collision(terrain);
+        if (collision[0] !== 0 && collision[1] !== 0) {
+          _this2.hitTerrain(collision);
+        }
+      });
+    }
+  }, {
+    key: "hitTerrain",
+    value: function hitTerrain(collision) {
+      if (Math.abs(collision[0]) > Math.abs(collision[1]) - 10 || collision[0] > 0) {
+        this.pos[1] += collision[1];
+        if (collision[1] < 0 !== this.gravityMultiplier < 0) {
+          this.onGround = true;
+          this.velocity[1] = 0;
+        }
+      } else {
+        this.game.gameOver();
+      }
     }
   }]);
 
-  return Sound;
+  return Player;
+}(_gameObject2.default);
+
+Player.WIDTH = 36;
+Player.HEIGHT = 48;
+Player.MAX_SPEED = 10;
+Player.ACCELERATION = 2;
+Player.DIRECTIONAL_INFLUENCE = 0.5;
+Player.JUMP_VELOCITY = -15;
+Player.GRAVITY = 0.6;
+
+exports.default = Player;
+
+/***/ }),
+/* 6 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _game = __webpack_require__(3);
+
+var _game2 = _interopRequireDefault(_game);
+
+var _input = __webpack_require__(8);
+
+var _input2 = _interopRequireDefault(_input);
+
+var _audio = __webpack_require__(2);
+
+var _audio2 = _interopRequireDefault(_audio);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+document.addEventListener("DOMContentLoaded", function () {
+  var canvasEl = document.getElementById("game");
+  canvasEl.width = _game2.default.WIDTH;
+  canvasEl.height = _game2.default.HEIGHT;
+
+  var muteEl = document.querySelector(".sound-toggle");
+
+  (0, _audio.mute)();
+  muteEl.addEventListener("click", function () {
+    if (muteEl.classList.contains("muted")) {
+      (0, _audio.unmute)();
+    } else {
+      (0, _audio.mute)();
+    }
+    muteEl.classList.toggle("muted");
+  });
+
+  var startEls = document.querySelectorAll(".start-game-button");
+  var homeStartEl = document.querySelector(".start-game-button.home");
+  var gameOverEl = document.getElementById("game-over");
+  var resultEl = document.querySelector("p.result");
+  var instructionsEl = document.querySelector(".instructions");
+  var howToPlayEl = document.querySelector(".how-to-play");
+
+  Promise.all(Object.values(_audio2.default).map(function (sound) {
+    return sound.promise;
+  })).then(function () {
+    startEls.forEach(function (el) {
+      return el.classList.remove("hide");
+    });
+  });
+
+  howToPlayEl.addEventListener("click", function () {
+    return instructionsEl.classList.toggle("hide");
+  });
+
+  var onStartGame = function onStartGame() {
+    instructionsEl.classList.add("hide");
+    gameOverEl.classList.add("hide");
+    homeStartEl.classList.add("hide");
+    game.start();
+  };
+
+  var onGameEnd = function onGameEnd(result) {
+    gameOverEl.classList.remove("hide");
+    resultEl.textContent = result;
+  };
+
+  var ctx = canvasEl.getContext("2d");
+  var input = new _input2.default();
+  var game = new _game2.default(ctx, input, onGameEnd, _audio2.default);
+
+  startEls.forEach(function (el) {
+    return el.addEventListener("click", onStartGame);
+  });
+  startEls[0].addEventListener("click", onStartGame);
+});
+
+/***/ }),
+/* 7 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _utils = __webpack_require__(0);
+
+var _sprites = __webpack_require__(1);
+
+var _gameObject = __webpack_require__(4);
+
+var _gameObject2 = _interopRequireDefault(_gameObject);
+
+var _game = __webpack_require__(3);
+
+var _game2 = _interopRequireDefault(_game);
+
+var _player = __webpack_require__(5);
+
+var _player2 = _interopRequireDefault(_player);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var Terrain = function (_GameObject) {
+  _inherits(Terrain, _GameObject);
+
+  function Terrain(pos, width, height) {
+    _classCallCheck(this, Terrain);
+
+    var _this = _possibleConstructorReturn(this, (Terrain.__proto__ || Object.getPrototypeOf(Terrain)).call(this, pos, width, height));
+
+    _this.sprites = _sprites.spriteLocations.environment;
+    return _this;
+  }
+
+  _createClass(Terrain, [{
+    key: "flipped",
+    value: function flipped() {
+      return new Terrain([this.pos[0], _game2.default.HEIGHT - (this.pos[1] + this.height)], this.width, this.height);
+    }
+  }, {
+    key: "isTop",
+    value: function isTop() {
+      return this.pos[1] <= 0;
+    }
+  }, {
+    key: "draw",
+    value: function draw(ctx) {
+      ctx.fillStyle = "#756";
+      for (var col = 0; col < this.getBlockWidth(); col++) {
+        for (var row = 0; row < this.getBlockHeight(); row++) {
+          var tile = "stoneCenter";
+          if (row === 0) {
+            tile = "stoneMid";
+          }
+          if (row >= this.getBlockHeight() - 1) {
+            tile = "stoneMid";
+            _utils.drawFlipped.apply(undefined, [ctx, this.sprites.imageEl].concat(_toConsumableArray(this.sprites.locations[tile]), [Math.floor(this.pos[0] + col * Terrain.BLOCK_WIDTH), this.pos[1] + row * Terrain.BLOCK_HEIGHT, Terrain.BLOCK_WIDTH, Terrain.BLOCK_HEIGHT]));
+          } else {
+            ctx.drawImage.apply(ctx, [this.sprites.imageEl].concat(_toConsumableArray(this.sprites.locations[tile]), [Math.floor(this.pos[0] + col * Terrain.BLOCK_WIDTH), this.pos[1] + row * Terrain.BLOCK_HEIGHT, Terrain.BLOCK_WIDTH, Terrain.BLOCK_HEIGHT]));
+          }
+        }
+      }
+    }
+  }, {
+    key: "getBlockHeight",
+    value: function getBlockHeight() {
+      return this.height / Terrain.BLOCK_HEIGHT;
+    }
+  }, {
+    key: "getBlockWidth",
+    value: function getBlockWidth() {
+      return this.width / Terrain.BLOCK_WIDTH;
+    }
+  }, {
+    key: "nextState",
+    value: function nextState(playerSpeed, delta) {
+      this.pos[0] -= playerSpeed * delta;
+    }
+  }], [{
+    key: "fromLastTerrain",
+    value: function fromLastTerrain(lastTerrain, speed, difficulty) {
+      var shouldFlip = false;
+      if (lastTerrain.isTop()) {
+        lastTerrain = lastTerrain.flipped();
+        shouldFlip = true;
+      }
+
+      var newTerrain = void 0;
+      if ((0, _utils.randRange)(0, 2) === 0) {
+        newTerrain = this.newFlippedTerrain(lastTerrain, speed, difficulty);
+      } else {
+        newTerrain = this.newTerrain(lastTerrain, speed, difficulty);
+      }
+
+      if (shouldFlip) {
+        newTerrain = newTerrain.flipped();
+      }
+      return newTerrain;
+    }
+  }, {
+    key: "newFlippedTerrain",
+    value: function newFlippedTerrain(lastTerrain, speed, difficulty) {
+      var bottom = (0, _utils.randRange)(1, 3) * Terrain.BLOCK_HEIGHT;
+      var maxGap = this.maxJumpableGap(speed, lastTerrain.getTop() - bottom, 0);
+      var left = lastTerrain.getRight() + (0, _utils.randRange)((-0.2 + difficulty * 1.7) * maxGap, (0.2 + difficulty * 1.7) * maxGap);
+      var width = (0, _utils.randRange)(4, 15) * Terrain.BLOCK_HEIGHT;
+
+      return new Terrain([left, bottom - Terrain.HEIGHT], width, Terrain.HEIGHT);
+    }
+  }, {
+    key: "newTerrain",
+    value: function newTerrain(lastTerrain, speed, difficulty) {
+      var top = _game2.default.HEIGHT - (0, _utils.randRange)(1, 3) * Terrain.BLOCK_HEIGHT;
+      var maxGap = this.maxJumpableGap(speed, top - lastTerrain.getTop(), _player2.default.JUMP_VELOCITY);
+      var left = lastTerrain.getRight() + (0, _utils.randRange)((0.2 + difficulty) * maxGap, (0.5 + difficulty) * maxGap);
+      var width = (0, _utils.randRange)(6, 14) * Terrain.BLOCK_HEIGHT;
+
+      return new Terrain([left, top], width, Terrain.HEIGHT);
+    }
+  }, {
+    key: "maxJumpableGap",
+    value: function maxJumpableGap(speed, dy, v0) {
+      var g = _player2.default.GRAVITY;
+      var jumpTime = (-v0 + Math.pow(Math.pow(v0, 2) + 2 * g * dy, 0.5)) / g;
+      var gap = jumpTime * speed;
+
+      return gap;
+    }
+  }]);
+
+  return Terrain;
+}(_gameObject2.default);
+
+Terrain.BLOCK_HEIGHT = 70;
+Terrain.BLOCK_WIDTH = 70;
+Terrain.HEIGHT = 4 * Terrain.BLOCK_HEIGHT;
+
+exports.default = Terrain;
+
+/***/ }),
+/* 8 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _keyCodes = __webpack_require__(9);
+
+var keyCodes = _interopRequireWildcard(_keyCodes);
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Input = function () {
+  function Input() {
+    _classCallCheck(this, Input);
+
+    this.keyDownHandler = this.keyDownHandler.bind(this);
+    this.keyUpHandler = this.keyUpHandler.bind(this);
+    this.isPressed = {
+      right: false,
+      left: false,
+      space: false
+    };
+  }
+
+  _createClass(Input, [{
+    key: "attachHandlers",
+    value: function attachHandlers() {
+      document.addEventListener("keydown", this.keyDownHandler, false);
+      document.addEventListener("keyup", this.keyUpHandler, false);
+    }
+  }, {
+    key: "keyDownHandler",
+    value: function keyDownHandler(e) {
+      switch (e.keyCode) {
+        case keyCodes.RIGHT:
+          this.isPressed.right = true;
+          break;
+        case keyCodes.LEFT:
+          this.isPressed.left = true;
+          break;
+        case keyCodes.SPACE:
+          e.preventDefault();
+          this.isPressed.space = true;
+          break;
+        case keyCodes.G:
+          this.isPressed.g = true;
+          break;
+      }
+    }
+  }, {
+    key: "keyUpHandler",
+    value: function keyUpHandler(e) {
+      switch (e.keyCode) {
+        case keyCodes.RIGHT:
+          this.isPressed.right = false;
+          break;
+        case keyCodes.LEFT:
+          this.isPressed.left = false;
+          break;
+        case keyCodes.SPACE:
+          this.isPressed.space = false;
+          break;
+        case keyCodes.G:
+          this.isPressed.g = false;
+          break;
+      }
+    }
+  }, {
+    key: "removeHandlers",
+    value: function removeHandlers() {
+      document.removeEventListener("keydown", this.keyDownHandler);
+      document.removeEventListener("keyup", this.keyUpHandler);
+    }
+  }]);
+
+  return Input;
 }();
 
-var sounds = {
-  background: new Sound("audio/background.mp3"),
-  jump: new Sound("audio/jump.mp3"),
-  gravityReverse: new Sound("audio/gravity-reverse.mp3")
-};
+exports.default = Input;
 
-exports.default = sounds;
+/***/ }),
+/* 9 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+var RIGHT = exports.RIGHT = 39;
+var LEFT = exports.LEFT = 37;
+var SPACE = exports.SPACE = 32;
+var G = exports.G = 71;
 
 /***/ })
 /******/ ]);
