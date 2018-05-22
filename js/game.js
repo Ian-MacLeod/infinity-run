@@ -143,7 +143,7 @@ class Game {
   }
 
   gameOver() {
-    this.onGameOver(`You ran for ${Math.floor(this.distance / 40)} meters.`);
+    this.onGameOver(Math.floor(this.distance / 40));
     this.playing = false;
     this.currentlyPlaying.stop();
   }

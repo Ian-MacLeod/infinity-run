@@ -573,7 +573,7 @@ var Game = function () {
   }, {
     key: "gameOver",
     value: function gameOver() {
-      this.onGameOver("You ran for " + Math.floor(this.distance / 40) + " meters.");
+      this.onGameOver(Math.floor(this.distance / 40));
       this.playing = false;
       this.currentlyPlaying.stop();
     }
@@ -834,6 +834,8 @@ document.addEventListener("DOMContentLoaded", function () {
   var resultEl = document.querySelector("p.result");
   var instructionsEl = document.querySelector(".instructions");
   var howToPlayEl = document.querySelector(".how-to-play");
+  var highScoreEl = document.querySelector(".high-score");
+  var scoreEl = document.querySelector(".score");
 
   Promise.all(Object.values(_audio2.default).map(function (sound) {
     return sound.promise;
@@ -856,7 +858,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
   var onGameEnd = function onGameEnd(result) {
     gameOverEl.classList.remove("hide");
-    resultEl.textContent = result;
+    resultEl.textContent = "You ran for " + result + " meters.";
+    var oldScore = parseInt(scoreEl.textContent);
+    scoreEl.textContent = Math.max(oldScore, result).toString();
+    highScoreEl.classList.remove("hide");
   };
 
   var ctx = canvasEl.getContext("2d");
